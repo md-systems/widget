@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\np8_webcode\Plugin\Block\WebcodeBlock.
@@ -18,13 +17,26 @@ use Drupal\views\Views;
  *   category = @Translation("Block")
  * )
  */
+
 class WidgetBlock extends BlockBase {
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    return \Drupal::formBuilder()->getForm('Drupal\widget\Form\WidgetBlockForm');
+    $config = \Drupal::configFactory()->get('block.block.widget');
+    $view_to_diplay = $config->get('settings.ViewToDisplay');
+
+    if (isset($view_to_diplay) == !empty($view_to_diplay)) {
+      $view_data = explode('.', $view_to_diplay);
+      $view = Views::getView($view_data[0]);
+      return $view->render($view_data[1]);
+
+    }
+    else {
+      drupal_set_message(t('No View is set in the configuration', 'warning'));
+      return '';
+    }
   }
 
   public function buildConfigurationForm(array $form, array &$form_state) {
