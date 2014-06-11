@@ -30,25 +30,25 @@ class WidgetBlock extends BlockBase {
   public function buildConfigurationForm(array $form, array &$form_state) {
 
     $options = array();
+    $config = \Drupal::configFactory()->get('block.block.widget');
 
     $enabled_views = Views::getEnabledViews();
     foreach($enabled_views as $k => $v) {
       $views = $v->get('display');
       foreach($views as $display => $params) {
         if($params['display_title'] != 'Master') {
-          $options[$k][serialize(array($k,$params['id']))] = $params['display_title'];
+          $options[$k][$k.'.'.$params['id']] = $params['display_title'];
         }
       }
     }
-    //var_dump($options);
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
-    $form['selected'] = array(
+    $form['ViewToDisplay'] = array(
       '#type' => 'select',
-      '#title' => t('Selected'),
+      '#title' => t('View to Display'),
       '#options' => $options,
-      '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
+      '#default_value' => $config->get('settings.ViewToDisplay')
     );
 
     return $form;
