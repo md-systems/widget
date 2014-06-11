@@ -8,6 +8,8 @@ namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
 use Drupal\views\Views;
+use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\NestedArray;
 /**
  * Provides a 'widget' block.
  *
@@ -66,6 +68,36 @@ class WidgetBlock extends BlockBase {
       '#default_value' => $config->get('settings.ViewToDisplay'),
       '#empty_option' => t('--None--')
 
+    );
+
+    // Set up the attributes used by a modal to prevent duplication later.
+    $attributes = array(
+      'class' => array('use-ajax'),
+      'data-accepts' => 'application/vnd.drupal-modal',
+      'data-dialog-options' => Json::encode(array(
+          'width' => 'auto',
+        )),
+    );
+    $add_button_attributes = NestedArray::mergeDeep($attributes, array(
+      'class' => array(
+        'button',
+        'button--small',
+        'button-action',
+      ),
+    ));
+
+    $form['block_section']['add'] = array(
+      '#type' => 'link',
+      '#title' => $this->t('Add new block'),
+      '#route_name' => 'widget.block_select_block',
+      '#route_parameters' => array(
+      ),
+      '#attributes' => $add_button_attributes,
+      '#attached' => array(
+        'library' => array(
+          'core/drupal.ajax',
+        ),
+      ),
     );
 
     return $form;

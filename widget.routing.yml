@@ -1,0 +1,7 @@
+widget.block_select_block:
+  path: '/admin/structure/widget/manage/block/select'
+  defaults:
+    _content: '\Drupal\widget\Controller\WidgetController::selectBlock'
+    _title: 'Select block'
+  requirements:
+    _entity_access: page.update
