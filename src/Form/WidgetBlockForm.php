@@ -32,18 +32,6 @@ class WidgetBlockForm extends FormBase {
     //kint(Views::getAllViews());
 
 
-    $form['selected'] = array(
-      '#type' => 'select',
-      '#title' => t('Selected'),
-      '#options' => array(
-        0 => t('No'),
-        1 => t('Yes'),
-      ),
-      '#default_value' => $category['selected'],
-      '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
-    );
-
-
     $form['views_select'] = array(
       '#type' => 'select',
       '#title' => $this->t('Webcode'),
