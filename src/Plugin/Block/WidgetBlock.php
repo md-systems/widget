@@ -29,24 +29,25 @@ class WidgetBlock extends BlockBase {
 
   public function buildConfigurationForm(array $form, array &$form_state) {
 
-    kint(Views::getAllViews());
+    $options = array();
 
-    $all_views = Views::getAllViews();
-
-    foreach($all_views as $k => $v) {
-      $v->getDisplay($v->id);
-      kint(Views::getView($v->id));
+    $enabled_views = Views::getEnabledViews();
+    foreach($enabled_views as $k => $v) {
+      $views = $v->get('display');
+      foreach($views as $display => $params) {
+        if($params['display_title'] != 'Master') {
+          $options[$k][$params['id']] = $params['display_title'];
+        }
+      }
     }
+    //var_dump($options);
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['selected'] = array(
       '#type' => 'select',
       '#title' => t('Selected'),
-      '#options' => array(
-        0 => t('No'),
-        1 => t('Yes'),
-      ),
+      '#options' => $options,
       '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
     );
 
