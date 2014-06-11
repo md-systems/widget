@@ -36,7 +36,7 @@ class WidgetBlock extends BlockBase {
       $views = $v->get('display');
       foreach($views as $display => $params) {
         if($params['display_title'] != 'Master') {
-          $options[$k][$params['id']] = $params['display_title'];
+          $options[$k][serialize(array($k,$params['id']))] = $params['display_title'];
         }
       }
     }
