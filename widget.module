@@ -1,2 +1,5 @@
 <?php
 
+use Drupal\views\Views;
+
+kint(Views::getAllViews());
