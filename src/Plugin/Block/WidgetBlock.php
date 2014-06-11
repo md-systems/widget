@@ -26,15 +26,18 @@ class WidgetBlock extends BlockBase {
   public function build() {
     $config = \Drupal::configFactory()->get('block.block.widget');
     $view_to_diplay = $config->get('settings.ViewToDisplay');
+    $view_data = explode('.', $view_to_diplay);
 
-    if (isset($view_to_diplay) == !empty($view_to_diplay)) {
-      $view_data = explode('.', $view_to_diplay);
+
+
+    if (isset($view_to_diplay) == !empty($view_to_diplay) && $view_to_diplay !='--None--') {
+
       $view = Views::getView($view_data[0]);
       return $view->render($view_data[1]);
 
     }
     else {
-      drupal_set_message(t('No View is set in the configuration', 'warning'));
+      drupal_set_message(t('No View is set in the configuration'), 'warning');
       return '';
     }
   }
@@ -60,7 +63,9 @@ class WidgetBlock extends BlockBase {
       '#type' => 'select',
       '#title' => t('View to Display'),
       '#options' => $options,
-      '#default_value' => $config->get('settings.ViewToDisplay')
+      '#default_value' => $config->get('settings.ViewToDisplay'),
+      '#empty_option' => t('--None--')
+
     );
 
     return $form;
