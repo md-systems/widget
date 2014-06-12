@@ -109,7 +109,13 @@ class WidgetBlock extends BlockBase {
       if(empty($form_state['block_id'])) {
         $form_state['block_id'] = $block_to_display;
       }
-      $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id'], $this->configuration['block_settings']);
+
+      if (!empty($this->configuration['block_settings'])) {
+        $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id'], $this->configuration['block_settings']);
+      }
+      else {
+        $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id']);
+      }
       $form['block_settings'] = $block_form->buildConfigurationForm(array(), $form_state);
       $form['block_settings']['id'] = array(
         '#type' => 'value',
@@ -127,7 +133,7 @@ class WidgetBlock extends BlockBase {
   }
 
   public function submitBlockSelect(array $form, array &$form_state) {
-    //unset($this->configuration['block_settings']);
+
     $form_state['block_id'] = $form_state['values']['settings']['block_to_display'];
     $form_state['rebuild'] = 'TRUE';
   }
