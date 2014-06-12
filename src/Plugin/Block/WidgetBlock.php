@@ -7,10 +7,7 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
-use Drupal\views\Views;
-use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Component\Serialization\Json;
-use Drupal\Component\Utility\NestedArray;
+
 /**
  * Provides a 'widget' block.
  *
@@ -34,61 +31,21 @@ class WidgetBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    //$config = \Drupal::configFactory()->get('block.block.widget');
-    //$view_to_diplay = $config->get('settings.ViewToDisplay');
-    //$view_data = explode('.', $view_to_diplay);
 
-
-
-    /*if (isset($view_to_diplay) == !empty($view_to_diplay) && $view_to_diplay !='--None--') {
-
-      $view = Views::getView($view_data[0]);
-      return $view->render($view_data[1]);
-
-    }
-    else {
-      drupal_set_message(t('No View is set in the configuration'), 'warning');
-      return '';
-    }*/
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildConfigurationForm(array $form, array &$form_state) {
 
-    $options = array();
-    $config = \Drupal::configFactory()->get('block.block.widget');
-
-    /*$enabled_views = Views::getEnabledViews();
-    foreach($enabled_views as $k => $v) {
-      $views = $v->get('display');
-      foreach($views as $display => $params) {
-        if($params['display_title'] != 'Master') {
-          $options[$k][$k.'.'.$params['id']] = $params['display_title'];
-        }
-      }
-    }
-
-    $form = parent::buildConfigurationForm($form, $form_state);
-
-    $form['ViewToDisplay'] = array(
-      '#type' => 'select',
-      '#title' => t('View to Display'),
-      '#options' => $options,
-      '#default_value' => $config->get('settings.ViewToDisplay'),
-      '#empty_option' => t('--None--')
-
-    );*/
-
     $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
-    //kint($available_plugins);
 
-    $blockOptions = array();
+    $block_options = array();
 
-    foreach($available_plugins as $k => $v) {
-      //kint($k);
-      foreach($v as $display => $params) {
-        //if($params['display_title'] != 'Master') {
-          $blockOptions[(string)$v['category']][$k] = (string)$v['admin_label'];
-        //}
+    foreach ($available_plugins as $k => $v) {
+      foreach ($v as $display => $params) {
+        $block_options[(string) $v['category']][$k] = (string) $v['admin_label'];
       }
     }
 
@@ -100,13 +57,13 @@ class WidgetBlock extends BlockBase {
       '#tree' => TRUE,
       '#type' => 'select',
       '#title' => t('Block to Display'),
-      '#options' => $blockOptions,
+      '#options' => $block_options,
       '#default_value' => $block_to_display,
       '#empty_option' => t('--None--'),
     );
 
-    if(!empty($form_state['block_id'])) { // || !empty($block_to_display)
-      if(empty($form_state['block_id'])) {
+    if (!empty($form_state['block_id'])) {
+      if (empty($form_state['block_id'])) {
         $form_state['block_id'] = $block_to_display;
       }
 
