@@ -40,7 +40,7 @@ class WidgetBlock extends BlockBase {
 
 
 
-    if (isset($view_to_diplay) == !empty($view_to_diplay) && $view_to_diplay !='--None--') {
+    /*if (isset($view_to_diplay) == !empty($view_to_diplay) && $view_to_diplay !='--None--') {
 
       $view = Views::getView($view_data[0]);
       return $view->render($view_data[1]);
@@ -49,7 +49,7 @@ class WidgetBlock extends BlockBase {
     else {
       drupal_set_message(t('No View is set in the configuration'), 'warning');
       return '';
-    }
+    }*/
   }
 
   public function buildConfigurationForm(array $form, array &$form_state) {
@@ -102,7 +102,7 @@ class WidgetBlock extends BlockBase {
       '#title' => t('Block to Display'),
       '#options' => $blockOptions,
       '#default_value' => $block_to_display,
-      '#empty_option' => t('--None--')
+      '#empty_option' => t('--None--'),
     );
 
     if(!empty($form_state['block_id'])) { // || !empty($block_to_display)
@@ -132,9 +132,18 @@ class WidgetBlock extends BlockBase {
     return $form;
   }
 
+  /**
+   * @{@inheritdoc}
+   */
   public function submitBlockSelect(array $form, array &$form_state) {
+    $block_to_display = $form_state['values']['settings']['block_to_display'];
 
-    $form_state['block_id'] = $form_state['values']['settings']['block_to_display'];
+    if ($block_to_display != $this->configuration['block_to_display']) {
+      unset($this->configuration['block_settings']);
+      unset($form_state['values']['settings']['block_settings']);
+    }
+
+    $form_state['block_id'] = $block_to_display;
     $form_state['rebuild'] = 'TRUE';
   }
 
