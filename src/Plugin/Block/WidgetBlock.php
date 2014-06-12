@@ -34,9 +34,9 @@ class WidgetBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    $config = \Drupal::configFactory()->get('block.block.widget');
-    $view_to_diplay = $config->get('settings.ViewToDisplay');
-    $view_data = explode('.', $view_to_diplay);
+    //$config = \Drupal::configFactory()->get('block.block.widget');
+    //$view_to_diplay = $config->get('settings.ViewToDisplay');
+    //$view_data = explode('.', $view_to_diplay);
 
 
 
@@ -78,21 +78,21 @@ class WidgetBlock extends BlockBase {
 
     );*/
 
-    $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitions();
+    $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
     //kint($available_plugins);
-    //exit;
+
     $blockOptions = array();
 
     foreach($available_plugins as $k => $v) {
+      //kint($k);
       foreach($v as $display => $params) {
         //if($params['display_title'] != 'Master') {
-          $blockOptions[$k][$v['id']] = (string)$v['admin_label'];
+          $blockOptions[(string)$v['category']][$k] = (string)$v['admin_label'];
         //}
       }
     }
 
-    $block_to_display = $config->get('settings.block_to_display');
-    //kint($block_to_display);
+    $block_to_display = $this->configuration['block_to_display'];
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
@@ -105,13 +105,13 @@ class WidgetBlock extends BlockBase {
       '#empty_option' => t('--None--')
     );
 
-    if(!empty($form_state['block_id']) || !empty($block_to_display)) {
+    if(!empty($form_state['block_id'])) { // || !empty($block_to_display)
       if(empty($form_state['block_id'])) {
         $form_state['block_id'] = $block_to_display;
       }
-      $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id']);
-      $form['settings'] = $block_form->buildConfigurationForm(array(), $form_state);
-      $form['settings']['id'] = array(
+      $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id'], $this->configuration['block_settings']);
+      $form['block_settings'] = $block_form->buildConfigurationForm(array(), $form_state);
+      $form['block_settings']['id'] = array(
         '#type' => 'value',
         '#value' => $form_state['block_id'],
       );
@@ -119,7 +119,7 @@ class WidgetBlock extends BlockBase {
 
     $form['block_to_display_submit'] = array(
       '#type' => 'submit',
-      '#value' => t('submit'),
+      '#value' => t('Congigure'),
       '#submit' => array(array($this, 'submitBlockSelect')),
     );
 
@@ -127,6 +127,7 @@ class WidgetBlock extends BlockBase {
   }
 
   public function submitBlockSelect(array $form, array &$form_state) {
+    //unset($this->configuration['block_settings']);
     $form_state['block_id'] = $form_state['values']['settings']['block_to_display'];
     $form_state['rebuild'] = 'TRUE';
   }
