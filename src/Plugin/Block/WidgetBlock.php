@@ -106,6 +106,12 @@ class WidgetBlock extends BlockBase {
       '#submit' => array(array($this, 'submitBlockSelect')),
     );
     if(!empty($form_state['block_id'])) {
+      //It's just copied in
+      $form = parent::buildForm($form, $form_state, $page, $page_variant_id, $block_id);
+      $form['region']['#default_value'] = $request->query->get('region');
+      return $form;
+      //till here
+
       kint($form_state['block_id']);
     }
 
