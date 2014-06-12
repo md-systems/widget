@@ -1,12 +1,13 @@
 <?php
 /**
  * @file
- * Contains \Drupal\np8_webcode\Plugin\Block\WebcodeBlock.
+ * Contains \Drupal\widget\Plugin\Block\WidgetBlock.
  */
 
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
+use Drupal\block\BlockPluginBag;
 
 /**
  * Provides a 'widget' block.
@@ -32,6 +33,20 @@ class WidgetBlock extends BlockBase {
    */
   public function build() {
 
+    if (isset($this->configuration['block_settings']) && !empty($this->configuration['block_settings'])) {
+      $block_options = $this->configuration['block_settings'];
+
+      $block_plugin_bag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $block_options['id'], $block_options, $block_options['id']);
+      $block = $block_plugin_bag->get($block_options['id']);
+
+      if ($block->access(\Drupal::currentUser())) {
+        $row = $block->build();
+        $block_name = drupal_html_class("block-{$block_options['id']}");
+        $row['#prefix'] = '<div class="' . $block_name . '">';
+        $row['#suffix'] = '</div>';
+        return $row;
+      }
+    }
   }
 
   /**
