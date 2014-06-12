@@ -5,7 +5,7 @@
  * Contains \Drupal\page_manager\Controller\PageManagerController.
  */
 
-namespace Drupal\page_manager\Controller;
+namespace Drupal\widget\Controller;
 
 use Drupal\block\BlockManagerInterface;
 use Drupal\page_manager\PageInterface;
@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Provides route controllers for Page Manager.
  */
-class PageManagerController extends ControllerBase {
+class WidgetController extends ControllerBase {
 
   /**
    * The block manager.
@@ -289,7 +289,7 @@ class PageManagerController extends ControllerBase {
    * @return array
    *   The block selection page.
    */
-  public function selectBlock(Request $request, PageInterface $page, $page_variant_id) {
+  public function selectBlock(Request $request, PageInterface $page) {
     // Add a section containing the available blocks to be added to the variant.
     $build = array(
       '#type' => 'container',
@@ -316,10 +316,10 @@ class PageManagerController extends ControllerBase {
       // Add a link for each available block within each region.
       $build[$category_key]['content']['#links'][$plugin_id] = array(
         'title' => $plugin_definition['admin_label'],
-        'route_name' => 'page_manager.page_variant_add_block',
+        'route_name' => 'widget.add_block',
         'route_parameters' => array(
           'page' => $page->id(),
-          'page_variant_id' => $page_variant_id,
+          //'page_variant_id' => $page_variant_id,
           'block_id' => $plugin_id,
           'region' => $request->query->get('region'),
         ),

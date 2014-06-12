@@ -8,6 +8,7 @@ namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
 use Drupal\views\Views;
+use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 /**
@@ -21,6 +22,13 @@ use Drupal\Component\Utility\NestedArray;
  */
 
 class WidgetBlock extends BlockBase {
+
+  /**
+   * The block manager.
+   *
+   * @var \Drupal\Component\Plugin\PluginManagerInterface
+   */
+  protected $blockManager;
 
   /**
    * {@inheritdoc}
@@ -49,7 +57,7 @@ class WidgetBlock extends BlockBase {
     $options = array();
     $config = \Drupal::configFactory()->get('block.block.widget');
 
-    $enabled_views = Views::getEnabledViews();
+    /*$enabled_views = Views::getEnabledViews();
     foreach($enabled_views as $k => $v) {
       $views = $v->get('display');
       foreach($views as $display => $params) {
@@ -68,39 +76,45 @@ class WidgetBlock extends BlockBase {
       '#default_value' => $config->get('settings.ViewToDisplay'),
       '#empty_option' => t('--None--')
 
+    );*/
+
+    $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitions();
+
+    $blockOptions = array();
+
+    foreach($available_plugins as $k => $v) {
+      foreach($v as $display => $params) {
+        //if($params['display_title'] != 'Master') {
+          $blockOptions[$k][$k.'.'.$v['id']] = (string)$v['admin_label'];
+        //}
+      }
+    }
+
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    $form['block_to_display'] = array(
+      '#type' => 'select',
+      '#title' => t('Block to Display'),
+      '#options' => $blockOptions,
+      '#default_value' => $config->get('settings.block_to_display'),
+      '#empty_option' => t('--None--')
     );
 
-    // Set up the attributes used by a modal to prevent duplication later.
-    $attributes = array(
-      'class' => array('use-ajax'),
-      'data-accepts' => 'application/vnd.drupal-modal',
-      'data-dialog-options' => Json::encode(array(
-          'width' => 'auto',
-        )),
+    $form['block_to_display_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('submit'),
+      '#submit' => array(array($this, 'submitBlockSelect')),
     );
-    $add_button_attributes = NestedArray::mergeDeep($attributes, array(
-      'class' => array(
-        'button',
-        'button--small',
-        'button-action',
-      ),
-    ));
-
-    $form['block_section']['add'] = array(
-      '#type' => 'link',
-      '#title' => $this->t('Add new block'),
-      '#route_name' => 'widget.block_select_block',
-      '#route_parameters' => array(
-      ),
-      '#attributes' => $add_button_attributes,
-      '#attached' => array(
-        'library' => array(
-          'core/drupal.ajax',
-        ),
-      ),
-    );
+    if(!empty($form_state['block_id'])) {
+      kint($form_state['block_id']);
+    }
 
     return $form;
+  }
+
+  public function submitBlockSelect(array $form, array &$form_state) {
+    $form_state['block_id'] = $form_state['values']['settings']['block_to_display'];
+    $form_state['rebuild'] = 'TRUE';
   }
 
 }

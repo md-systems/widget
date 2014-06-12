@@ -22,30 +22,7 @@ class WidgetBlockForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'widget';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildForm(array $form, array &$form_state) {
-    //kint(Views::getAllViews());
-
-
-    $form['views_select'] = array(
-      '#type' => 'select',
-      '#title' => $this->t('Webcode'),
-      '#title_display' => 'invisible',
-      '#size' => 15,
-      '#required' => TRUE,
-      '#default_value' => '',
-      '#attributes' => array('title' => $this->t('Enter your Webcode.')),
-      '#placeholder' => $this->t('Enter a webcode'),
-    );
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => $this->t('Go'));
-
-    return $form;
+    return 'block_to_display';
   }
 
   /**
@@ -53,14 +30,6 @@ class WidgetBlockForm extends FormBase {
    */
   public function submitForm(array &$form, array &$form_state) {
 
-    // Check if path exsits or the User has access.
-    $nid = $this->webcodeManager->getNode($form_state['values']['webcode']);
-
-    if ($nid) {
-      $form_state['redirect_route'] = new Url('node.view', array('node' => $nid));
-    }
-    else {
-      drupal_set_message(t('Your Webcode %webcode can not be found.', array('%webcode' => $form_state['values']['webcode'])), 'error');
-    }
+      $form_state['rebuildForm'] = new Url('node.view', array('node' => $nid));
   }
 }
