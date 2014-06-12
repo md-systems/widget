@@ -79,41 +79,49 @@ class WidgetBlock extends BlockBase {
     );*/
 
     $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitions();
-
+    //kint($available_plugins);
+    //exit;
     $blockOptions = array();
 
     foreach($available_plugins as $k => $v) {
       foreach($v as $display => $params) {
         //if($params['display_title'] != 'Master') {
-          $blockOptions[$k][$k.'.'.$v['id']] = (string)$v['admin_label'];
+          $blockOptions[$k][$v['id']] = (string)$v['admin_label'];
         //}
       }
     }
 
+    $block_to_display = $config->get('settings.block_to_display');
+    //kint($block_to_display);
+
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['block_to_display'] = array(
+      '#tree' => TRUE,
       '#type' => 'select',
       '#title' => t('Block to Display'),
       '#options' => $blockOptions,
-      '#default_value' => $config->get('settings.block_to_display'),
+      '#default_value' => $block_to_display,
       '#empty_option' => t('--None--')
     );
+
+    if(!empty($form_state['block_id']) || !empty($block_to_display)) {
+      if(empty($form_state['block_id'])) {
+        $form_state['block_id'] = $block_to_display;
+      }
+      $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id']);
+      $form['settings'] = $block_form->buildConfigurationForm(array(), $form_state);
+      $form['settings']['id'] = array(
+        '#type' => 'value',
+        '#value' => $form_state['block_id'],
+      );
+    }
 
     $form['block_to_display_submit'] = array(
       '#type' => 'submit',
       '#value' => t('submit'),
       '#submit' => array(array($this, 'submitBlockSelect')),
     );
-    if(!empty($form_state['block_id'])) {
-      //It's just copied in
-      $form = parent::buildForm($form, $form_state, $page, $page_variant_id, $block_id);
-      $form['region']['#default_value'] = $request->query->get('region');
-      return $form;
-      //till here
-
-      kint($form_state['block_id']);
-    }
 
     return $form;
   }
