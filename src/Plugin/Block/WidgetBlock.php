@@ -8,6 +8,7 @@ namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
 use Drupal\block\BlockPluginBag;
+use Drupal\layout\Layout;
 
 /**
  * Provides a 'widget' block.
@@ -15,7 +16,7 @@ use Drupal\block\BlockPluginBag;
  * @Block(
  *   id = "widget_block",
  *   admin_label = @Translation("Widget"),
- *   category = @Translation("Block")
+ *   category = @Translation("Widget")
  * )
  */
 
@@ -28,19 +29,13 @@ class WidgetBlock extends BlockBase {
    */
   protected $blockManager;
 
-  protected $layouts;
-
-  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    // @todo get the layouts and regions from the layout module instead.
-    $this->layouts = array(
-      'widget_two_column' => array(
-        'region_left' => t('Left column'),
-        'region_right' => t('Right column'),
-      ),
+  public function defaultConfiguration() {
+    return array(
+      'widget_blocks_config' => array(),
+      'widget_layout' => NULL,
     );
   }
+
 
   /**
    * {@inheritdoc}
@@ -49,9 +44,11 @@ class WidgetBlock extends BlockBase {
     if (isset($this->configuration['widget_layout']) && !empty($this->configuration['widget_blocks_config'])) {
       $output = array();
 
-      foreach ($this->layouts[$this->configuration['widget_layout']] as $region_delta => $region_name) {
-        $block_config = $this->configuration['widget_blocks_config'][$region_delta]['block_settings'];
-        $block_id = $this->configuration['widget_blocks_config'][$region_delta]['block_id'];
+      $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['widget_layout']);
+      // @todo: use the layout.
+      foreach ($layout->getRegionNames() as $region_id => $region_name) {
+        $block_config = $this->configuration['widget_blocks_config'][$region_id]['block_settings'];
+        $block_id = $this->configuration['widget_blocks_config'][$region_id]['block_id'];
         $block_plugin_bag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $block_id, $block_config, $block_id);
         $block = $block_plugin_bag->get($block_id);
 
@@ -77,18 +74,17 @@ class WidgetBlock extends BlockBase {
       $form_state['block_count'] = 1;
     }
 
-    $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
+    $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
 
     $block_options = array();
 
-    foreach ($available_plugins as $k => $v) {
-      foreach ($v as $display => $params) {
-        $block_options[(string) $v['category']][$k] = (string) $v['admin_label'];
-      }
+    foreach ($block_plugins as $plugin_id => $block_definition) {
+      $block_options[(string) $block_definition['category']][$plugin_id] = (string) $block_definition['admin_label'];
     }
 
-    $widget_blocks = empty($this->configuration['widget_blocks_config']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
+    $widget_blocks = !empty($form_state['values']['settings']['blocks']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
     $widget_layout = !empty($form_state['values']['settings']['widget_layout']) ? $form_state['values']['settings']['widget_layout'] : $this->configuration['widget_layout'];
+
     $ajax_properties =  array(
       '#ajax' => array(
         'callback' => array($this, 'widgetBlockAJAXCallback'),
@@ -99,11 +95,13 @@ class WidgetBlock extends BlockBase {
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
+    $layouts = Layout::getLayoutOptions();
+
     $form['widget_layout'] = array(
       '#type' => 'select',
       '#required' => TRUE,
       '#title' => t('Widget layout'),
-      '#options' => array_combine(array_keys($this->layouts), array_keys($this->layouts)),
+      '#options' => $layouts,
       '#default_value' => $widget_layout,
     ) + $ajax_properties;
 
@@ -113,15 +111,21 @@ class WidgetBlock extends BlockBase {
       '#suffix' => '</div>',
     );
 
-    foreach ($this->layouts[$widget_layout] as $region_delta => $region_name) {
-      $block_config = $widget_blocks[$region_delta];
-      $form['blocks'][$region_delta] = array(
+    if (!$widget_layout) {
+      return $form;
+    }
+
+    /* @var \Drupal\layout\Plugin\Layout\LayoutInterface $layout */
+    $layout = \Drupal::service('plugin.manager.layout')->createInstance($widget_layout);
+    foreach ($layout->getRegionNames() as $region_id => $region_name) {
+      $block_config = $widget_blocks[$region_id];
+      $form['blocks'][$region_id] = array(
         '#type' => 'details',
         '#title' => $region_name,
         '#open' => TRUE,
       );
 
-      $form['blocks'][$region_delta]['block_id'] = array(
+      $form['blocks'][$region_id]['block_id'] = array(
         '#type' => 'select',
         '#title' => t('Block'),
         '#options' => $block_options,
@@ -137,7 +141,7 @@ class WidgetBlock extends BlockBase {
           $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id']);
         }
 
-        $form['blocks'][$region_delta]['block_settings'] = array(
+        $form['blocks'][$region_id]['block_settings'] = array(
           '#type' => 'details',
           '#title' => t('Block settings'),
           '#open' => FALSE,
@@ -145,7 +149,7 @@ class WidgetBlock extends BlockBase {
         );
       }
       else {
-        unset($form['blocks'][$region_delta]['block_settings']);
+        unset($form['blocks'][$region_id]['block_settings']);
       }
     }
 

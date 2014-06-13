@@ -1,0 +1,16 @@
+widget_main_with_quicktab:
+  label: Main element with Quicktabs
+  category: Widget
+  type: partial
+  theme: widget_maiin_with_quicktab
+  regions:
+    main:
+      label: Main
+    quicktab_1:
+      label: Quicktab 1
+    quicktab_2:
+      label: Quicktab 2
+    quicktab_3:
+      label: Quicktab 3
+    below_quicktab:
+      label: Below quicktab

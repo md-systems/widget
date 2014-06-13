@@ -1,4 +1,6 @@
-name : 'Widget'
-description : 'widget'
-core: 8.x
 type: module
+name : 'Widget'
+description: 'Provides a widget block that contains multiple inner blocks with a layout (superblock)'
+core: 8.x
+dependencies:
+  - layout
