@@ -54,6 +54,10 @@ class WidgetBlock extends BlockBase {
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
 
+    if (!isset($form_state['block_count'])) {
+      $form_state['block_count'] = 1;
+    }
+
     $available_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
 
     $block_options = array();
@@ -67,6 +71,12 @@ class WidgetBlock extends BlockBase {
     $block_to_display = $this->configuration['block_to_display'];
 
     $form = parent::buildConfigurationForm($form, $form_state);
+
+    $form['blocks'] = array(
+      '#tree' => TRUE,
+      '#prefix' => '<div id="widget-block-wrapper">',
+      '#suffix' => '</div>',
+    );
 
     $form['block_to_display'] = array(
       '#tree' => TRUE,
@@ -95,13 +105,33 @@ class WidgetBlock extends BlockBase {
       );
     }
 
+    /*
     $form['block_to_display_submit'] = array(
       '#type' => 'submit',
       '#value' => t('Configure'),
       '#submit' => array(array($this, 'submitBlockSelect')),
     );
 
+    $form['add_block'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add block'),
+      '#submit' => array(array($this, 'addBlockSubmit')),
+      '#ajax' => array(
+        'callback' => array($this, 'addMoreCallback'),
+        'wrapper' => 'foo-replace',
+        'effect' => 'fade',
+      ),
+    );
+    */
+
     return $form;
+  }
+
+  /**
+   * @{@inheritdoc}
+   */
+  public function blockSubmit($form, &$form_state) {
+    $this->configuration['block_to_display'] = $form_state['values']['block_to_display'];
   }
 
   /**
@@ -115,8 +145,10 @@ class WidgetBlock extends BlockBase {
       unset($form_state['values']['settings']['block_settings']);
     }
 
+    $this->configuration['block_to_display'] = $block_to_display;
+
     $form_state['block_id'] = $block_to_display;
-    $form_state['rebuild'] = 'TRUE';
+    //$form_state['rebuild'] = 'TRUE';
   }
 
 }
