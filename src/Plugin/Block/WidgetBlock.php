@@ -97,7 +97,7 @@ class WidgetBlock extends BlockBase {
 
     $form['block_to_display_submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Congigure'),
+      '#value' => t('Configure'),
       '#submit' => array(array($this, 'submitBlockSelect')),
     );
 
