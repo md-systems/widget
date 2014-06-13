@@ -28,6 +28,18 @@ class WidgetBlock extends BlockBase {
    */
   protected $blockManager;
 
+  protected $layouts;
+
+  public function __construct() {
+    // @todo get the layouts and regions from the layout module instead.
+    $this->layouts = array(
+      'widget_two_column' => array(
+        'region_left' => t('Left column'),
+        'region_right' => t('Right column'),
+      ),
+    );
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -68,25 +80,44 @@ class WidgetBlock extends BlockBase {
       }
     }
 
-    $block_to_display = $this->configuration['block_to_display'];
+    $selected_blocks = empty($this->configuration['widget_blocks']) ? NULL : $this->configuration['widget_blocks'];
+    $widget_layout = empty($this->configuration['widget_layout']) ? NULL : $this->configuration['widget_layout'];
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
+    $form['widget_layout'] = array(
+      '#type' => 'select',
+      '#required' => TRUE,
+      '#title' => t('Widget layout'),
+      '#options' => array_keys($this->layouts),
+      '#default_value' => $widget_layout,
+      '#submit' => array($this, 'saveLayoutAJAXCallbacksaveLayout'),
+      '#ajax' => array(
+        'callback' => array($this, 'saveLayoutAJAXCallback'),
+        'wrapper' => 'widget-block-wrapper',
+        'effect' => 'fade',
+      ),
+    );
+
     $form['blocks'] = array(
-      '#tree' => TRUE,
+      '#type' => 'container',
       '#prefix' => '<div id="widget-block-wrapper">',
       '#suffix' => '</div>',
     );
 
-    $form['block_to_display'] = array(
-      '#tree' => TRUE,
-      '#type' => 'select',
-      '#title' => t('Block to Display'),
-      '#options' => $block_options,
-      '#default_value' => $block_to_display,
-      '#empty_option' => t('--None--'),
-    );
+    if ($widget_layout) {
+      foreach ($this->layouts[$widget_layout] as $region_delta => $region_name) {
+        $form['blocks']['widget_block_' . $region_name] = array(
+          '#type' => 'select',
+          '#title' => t('Block in') . ' ' . $region_name,
+          '#options' => $block_options,
+          '#default_value' => isset($selected_blocks[$region_delta]) ? $selected_blocks[$region_delta] : NULL,
+          '#empty_option' => t('--None--'),
+        );
+      }
+    }
 
+    /*
     if (!empty($form_state['block_id'])) {
       if (empty($form_state['block_id'])) {
         $form_state['block_id'] = $block_to_display;
@@ -134,6 +165,15 @@ class WidgetBlock extends BlockBase {
     $this->configuration['block_to_display'] = $form_state['values']['block_to_display'];
   }
 
+  public function saveLayoutAJAXCallback($form, &$form_state) {
+    return $form['blocks'];
+  }
+
+  public function saveLayoutSubmit($form, &$form_state) {
+    $this->configuration['widget_layout'] = $form_state['values']['widget_layout'];
+    $form_state['rebuild'] = TRUE;
+  }
+
   /**
    * @{@inheritdoc}
    */
@@ -148,7 +188,7 @@ class WidgetBlock extends BlockBase {
     $this->configuration['block_to_display'] = $block_to_display;
 
     $form_state['block_id'] = $block_to_display;
-    //$form_state['rebuild'] = 'TRUE';
+    $form_state['rebuild'] = 'TRUE';
   }
 
 }
