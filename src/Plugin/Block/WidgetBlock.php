@@ -82,7 +82,7 @@ class WidgetBlock extends BlockBase {
       }
     }
 
-    $blocks_config = empty($this->configuration['widget_blocks_config']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
+    $widget_blocks = empty($this->configuration['widget_blocks_config']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
     $widget_layout = !empty($form_state['values']['settings']['widget_layout']) ? $form_state['values']['settings']['widget_layout'] : $this->configuration['widget_layout'];
 
     $form = parent::buildConfigurationForm($form, $form_state);
@@ -107,19 +107,19 @@ class WidgetBlock extends BlockBase {
     );
 
     foreach ($this->layouts[$widget_layout] as $region_delta => $region_name) {
+      $block_config = $widget_blocks[$region_delta];
       $form['blocks'][$region_delta] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => $region_name,
-        '#collapsed' => TRUE,
+        '#open' => TRUE,
       );
 
-      $block_config = $blocks_config[$region_delta];
       $form['blocks'][$region_delta]['block_id'] = array(
         '#type' => 'select',
         '#title' => t('Block'),
         '#options' => $block_options,
+        '#required' => TRUE,
         '#default_value' => isset($block_config['block_id']) ? $block_config['block_id'] : NULL,
-        '#empty_option' => t('--None--'),
         '#ajax' => array(
           'callback' => array($this, 'widgetBlockAJAXCallback'),
           'wrapper' => 'widget-block-wrapper',
@@ -135,7 +135,15 @@ class WidgetBlock extends BlockBase {
           $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id']);
         }
 
-        $form['blocks'][$region_delta]['block_settings'] = $block_plugin->buildConfigurationForm(array(), $form_state);
+        $form['blocks'][$region_delta]['block_settings'] = array(
+          '#type' => 'details',
+          '#title' => t('Block settings'),
+          '#open' => FALSE,
+          'settings' => $block_plugin->buildConfigurationForm(array(), $form_state),
+        );
+      }
+      else {
+        unset($form['blocks'][$region_delta]['block_settings']);
       }
     }
 
@@ -150,6 +158,9 @@ class WidgetBlock extends BlockBase {
     $this->configuration['widget_layout'] = $form_state['values']['widget_layout'];
   }
 
+  /**
+   * Used by select widgets of block configuration form.
+   */
   public function widgetBlockAJAXCallback($form, &$form_state) {
     return $form['settings']['blocks'];
   }
