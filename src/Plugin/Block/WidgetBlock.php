@@ -46,20 +46,25 @@ class WidgetBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
+    if (isset($this->configuration['widget_layout']) && !empty($this->configuration['widget_blocks_config'])) {
+      $output = array();
 
-    if (isset($this->configuration['block_settings']) && !empty($this->configuration['block_settings'])) {
-      $block_options = $this->configuration['block_settings'];
+      foreach ($this->layouts[$this->configuration['widget_layout']] as $region_delta => $region_name) {
+        $block_config = $this->configuration['widget_blocks_config'][$region_delta]['block_settings'];
+        $block_id = $this->configuration['widget_blocks_config'][$region_delta]['block_id'];
+        $block_plugin_bag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $block_id, $block_config, $block_id);
+        $block = $block_plugin_bag->get($block_id);
 
-      $block_plugin_bag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $block_options['id'], $block_options, $block_options['id']);
-      $block = $block_plugin_bag->get($block_options['id']);
-
-      if ($block->access(\Drupal::currentUser())) {
-        $row = $block->build();
-        $block_name = drupal_html_class("block-{$block_options['id']}");
-        $row['#prefix'] = '<div class="' . $block_name . '">';
-        $row['#suffix'] = '</div>';
-        return $row;
+        if ($block->access(\Drupal::currentUser())) {
+          $row = $block->build();
+          $block_name = drupal_html_class("block-$block_id}");
+          $row['#prefix'] = '<div class="' . $block_name . '">';
+          $row['#suffix'] = '</div>';
+          $output[] = $row;
+        }
       }
+
+      return $output;
     }
   }
 
@@ -84,6 +89,13 @@ class WidgetBlock extends BlockBase {
 
     $widget_blocks = empty($this->configuration['widget_blocks_config']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
     $widget_layout = !empty($form_state['values']['settings']['widget_layout']) ? $form_state['values']['settings']['widget_layout'] : $this->configuration['widget_layout'];
+    $ajax_properties =  array(
+      '#ajax' => array(
+        'callback' => array($this, 'widgetBlockAJAXCallback'),
+        'wrapper' => 'widget-block-wrapper',
+        'effect' => 'fade',
+      ),
+    );
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
@@ -93,12 +105,7 @@ class WidgetBlock extends BlockBase {
       '#title' => t('Widget layout'),
       '#options' => array_combine(array_keys($this->layouts), array_keys($this->layouts)),
       '#default_value' => $widget_layout,
-      '#ajax' => array(
-        'callback' => array($this, 'widgetBlockAJAXCallback'),
-        'wrapper' => 'widget-block-wrapper',
-        'effect' => 'fade',
-      ),
-    );
+    ) + $ajax_properties;
 
     $form['blocks'] = array(
       '#type' => 'container',
@@ -120,12 +127,7 @@ class WidgetBlock extends BlockBase {
         '#options' => $block_options,
         '#required' => TRUE,
         '#default_value' => isset($block_config['block_id']) ? $block_config['block_id'] : NULL,
-        '#ajax' => array(
-          'callback' => array($this, 'widgetBlockAJAXCallback'),
-          'wrapper' => 'widget-block-wrapper',
-          'effect' => 'fade',
-        ),
-      );
+      ) + $ajax_properties;
 
       if (!empty($block_config['block_id'])) {
         if (!empty($block_config['block_settings'])) {
