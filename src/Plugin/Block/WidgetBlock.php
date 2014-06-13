@@ -82,8 +82,8 @@ class WidgetBlock extends BlockBase {
       }
     }
 
-    $selected_blocks = empty($this->configuration['widget_blocks']) ? NULL : $this->configuration['widget_blocks'];
-    $widget_layout = empty($this->configuration['widget_layout']) ? NULL : $this->configuration['widget_layout'];
+    $blocks_config = empty($this->configuration['widget_blocks_config']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
+    $widget_layout = !empty($form_state['values']['settings']['widget_layout']) ? $form_state['values']['settings']['widget_layout'] : $this->configuration['widget_layout'];
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
@@ -91,13 +91,13 @@ class WidgetBlock extends BlockBase {
       '#type' => 'select',
       '#required' => TRUE,
       '#title' => t('Widget layout'),
-      '#options' => array_keys($this->layouts),
+      '#options' => array_combine(array_keys($this->layouts), array_keys($this->layouts)),
       '#default_value' => $widget_layout,
-      '#submit' => array($this, 'saveLayoutAJAXCallbacksaveLayout'),
       '#ajax' => array(
-        'callback' => array($this, 'saveLayoutAJAXCallback'),
+        'callback' => array($this, 'layoutAJAXCallback'),
         'wrapper' => 'widget-block-wrapper',
         'effect' => 'fade',
+        'method' => 'replace',
       ),
     );
 
@@ -107,55 +107,33 @@ class WidgetBlock extends BlockBase {
       '#suffix' => '</div>',
     );
 
-    if ($widget_layout) {
-      foreach ($this->layouts[$widget_layout] as $region_delta => $region_name) {
-        $form['blocks']['widget_block_' . $region_name] = array(
-          '#type' => 'select',
-          '#title' => t('Block in') . ' ' . $region_name,
-          '#options' => $block_options,
-          '#default_value' => isset($selected_blocks[$region_delta]) ? $selected_blocks[$region_delta] : NULL,
-          '#empty_option' => t('--None--'),
-        );
-      }
-    }
-
-    /*
-    if (!empty($form_state['block_id'])) {
-      if (empty($form_state['block_id'])) {
-        $form_state['block_id'] = $block_to_display;
-      }
-
-      if (!empty($this->configuration['block_settings'])) {
-        $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id'], $this->configuration['block_settings']);
-      }
-      else {
-        $block_form = \Drupal::service('plugin.manager.block')->createInstance($form_state['block_id']);
-      }
-      $form['block_settings'] = $block_form->buildConfigurationForm(array(), $form_state);
-      $form['block_settings']['id'] = array(
-        '#type' => 'value',
-        '#value' => $form_state['block_id'],
+    foreach ($this->layouts[$widget_layout] as $region_delta => $region_name) {
+      $form['blocks'][$region_delta] = array(
+        '#type' => 'fieldset',
+        '#title' => $region_name,
+        '#collapsed' => TRUE,
       );
+
+      $block_config = $blocks_config[$region_delta];
+      $form['blocks'][$region_delta]['block_id'] = array(
+        '#type' => 'select',
+        '#title' => t('Block'),
+        '#options' => $block_options,
+        '#default_value' => isset($block_config['block_id']) ? $block_config['block_id'] : NULL,
+        '#empty_option' => t('--None--'),
+      );
+
+      if (!empty($block_config['block_id'])) {
+        if (!empty($block_config['block_settings'])) {
+          $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id'], $block_config['block_settings']);
+        }
+        else {
+          $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id']);
+        }
+
+        $form['blocks'][$region_delta]['block_settings'] = $block_plugin->buildConfigurationForm(array(), $form_state);
+      }
     }
-
-    /*
-    $form['block_to_display_submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Configure'),
-      '#submit' => array(array($this, 'submitBlockSelect')),
-    );
-
-    $form['add_block'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add block'),
-      '#submit' => array(array($this, 'addBlockSubmit')),
-      '#ajax' => array(
-        'callback' => array($this, 'addMoreCallback'),
-        'wrapper' => 'foo-replace',
-        'effect' => 'fade',
-      ),
-    );
-    */
 
     return $form;
   }
@@ -164,33 +142,12 @@ class WidgetBlock extends BlockBase {
    * @{@inheritdoc}
    */
   public function blockSubmit($form, &$form_state) {
-    $this->configuration['block_to_display'] = $form_state['values']['block_to_display'];
-  }
-
-  public function saveLayoutAJAXCallback($form, &$form_state) {
-    return $form['blocks'];
-  }
-
-  public function saveLayoutSubmit($form, &$form_state) {
+    $this->configuration['widget_blocks_config'] = $form_state['values']['blocks'];
     $this->configuration['widget_layout'] = $form_state['values']['widget_layout'];
-    $form_state['rebuild'] = TRUE;
   }
 
-  /**
-   * @{@inheritdoc}
-   */
-  public function submitBlockSelect(array $form, array &$form_state) {
-    $block_to_display = $form_state['values']['settings']['block_to_display'];
-
-    if ($block_to_display != $this->configuration['block_to_display']) {
-      unset($this->configuration['block_settings']);
-      unset($form_state['values']['settings']['block_settings']);
-    }
-
-    $this->configuration['block_to_display'] = $block_to_display;
-
-    $form_state['block_id'] = $block_to_display;
-    $form_state['rebuild'] = 'TRUE';
+  public function layoutAJAXCallback($form, &$form_state) {
+    return $form['settings']['blocks'];
   }
 
 }
