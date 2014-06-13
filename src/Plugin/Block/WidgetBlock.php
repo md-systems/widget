@@ -94,10 +94,9 @@ class WidgetBlock extends BlockBase {
       '#options' => array_combine(array_keys($this->layouts), array_keys($this->layouts)),
       '#default_value' => $widget_layout,
       '#ajax' => array(
-        'callback' => array($this, 'layoutAJAXCallback'),
+        'callback' => array($this, 'widgetBlockAJAXCallback'),
         'wrapper' => 'widget-block-wrapper',
         'effect' => 'fade',
-        'method' => 'replace',
       ),
     );
 
@@ -121,6 +120,11 @@ class WidgetBlock extends BlockBase {
         '#options' => $block_options,
         '#default_value' => isset($block_config['block_id']) ? $block_config['block_id'] : NULL,
         '#empty_option' => t('--None--'),
+        '#ajax' => array(
+          'callback' => array($this, 'widgetBlockAJAXCallback'),
+          'wrapper' => 'widget-block-wrapper',
+          'effect' => 'fade',
+        ),
       );
 
       if (!empty($block_config['block_id'])) {
@@ -146,7 +150,7 @@ class WidgetBlock extends BlockBase {
     $this->configuration['widget_layout'] = $form_state['values']['widget_layout'];
   }
 
-  public function layoutAJAXCallback($form, &$form_state) {
+  public function widgetBlockAJAXCallback($form, &$form_state) {
     return $form['settings']['blocks'];
   }
 
