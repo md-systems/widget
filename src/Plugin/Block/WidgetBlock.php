@@ -143,7 +143,12 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
 
     $form = parent::buildConfigurationForm($form, $form_state);
 
-    $layouts = Layout::getLayoutOptions();
+    $layouts = array();
+    foreach (Layout::layoutPluginManager()->getDefinitions() as $id => $definition) {
+      if ($definition['type'] == 'partial') {
+        $layouts[$id] = $definition['label'];
+      }
+    }
 
     $form['layout'] = array(
       '#type' => 'select',
