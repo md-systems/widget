@@ -179,7 +179,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
         '#type' => 'select',
         '#title' => t('Block'),
         '#options' => $block_options,
-        '#required' => TRUE,
+        //'#required' => TRUE,
         '#default_value' => isset($block_config['id']) ? $block_config['id'] : NULL,
       ) + $ajax_properties;
 

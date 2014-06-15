@@ -14,3 +14,23 @@ widget_main_with_quicktabs:
       label: Quicktab 3
     below_quicktab:
       label: Below quicktab
+
+widget_1col:
+  label: One column
+  category: Widget
+  type: partial
+  theme: widget_1col
+  regions:
+    main:
+      label: Main
+
+widget_2col:
+  label: Two columns
+  category: Widget
+  type: partial
+  theme: widget_2col
+  regions:
+    left:
+      label: Left
+    right:
+      label: right
