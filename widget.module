@@ -14,5 +14,9 @@ function widget_theme() {
       'variables' => array('regions' => array()),
       'template' => 'widget-main-with-quicktabs',
     ),
+    'widget_2col' => array(
+      'variables' => array('regions' => array()),
+      'template' => 'widget-2col',
+    ),
   );
 }
