@@ -1,8 +1,8 @@
-widget_main_with_quicktab:
+widget_main_with_quicktabs:
   label: Main element with Quicktabs
   category: Widget
   type: partial
-  theme: widget_maiin_with_quicktab
+  theme: widget_main_with_quicktabs
   regions:
     main:
       label: Main

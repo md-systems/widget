@@ -7,8 +7,12 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
-use Drupal\block\BlockPluginBag;
 use Drupal\layout\Layout;
+use Drupal\layout\LayoutRendererBlockAndContext;
+use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
+use Drupal\layout\Plugin\Layout\LayoutInterface;
+use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag;
+use Drupal\page_manager\Plugin\BlockPluginBag;
 
 /**
  * Provides a 'widget' block.
@@ -20,7 +24,7 @@ use Drupal\layout\Layout;
  * )
  */
 
-class WidgetBlock extends BlockBase {
+class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInterface {
 
   /**
    * The block manager.
@@ -29,51 +33,95 @@ class WidgetBlock extends BlockBase {
    */
   protected $blockManager;
 
+  /**
+   * The plugin bag that holds the block plugins.
+   *
+   * @var \Drupal\page_manager\Plugin\BlockPluginBag
+   */
+  protected $blockPluginBag;
+
+  /**
+   * Layout regions.
+   *
+   * @var \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag
+   */
+  public $layoutRegionBag;
+
   public function defaultConfiguration() {
     return array(
-      'widget_blocks_config' => array(),
-      'widget_layout' => NULL,
+      'blocks' => array(),
+      'layout' => NULL,
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function addLayoutRegion(array $configuration) {
+    // layout regions expect to have a UUID.
+    $configuration['uuid'] = $configuration['region_id'];
+    $this->getLayoutRegions()->addInstanceId($configuration['region_id'], $configuration);
+    return $configuration['region_id'];
+  }
+
+  /**
+   * Initializes the page variant regions on the basis of given layout.
+   *
+   * @param \Drupal\layout\Plugin\Layout\LayoutInterface $layout
+   *
+   * @return \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag
+   */
+  protected function initializeLayoutRegionsFromLayout(LayoutInterface $layout) {
+    $this->configuration['regions'] = array();
+    $definitions = $layout ? $layout->getRegionDefinitions() : array();
+    $weight = 0;
+    foreach ($definitions as $id => $regionPluginDefinition) {
+      $this->addLayoutRegion(array(
+          'id' => !empty($regionPluginDefinition['plugin_id']) ? $regionPluginDefinition['plugin_id'] : 'default',
+          'region_id' => $id,
+          'label' => $regionPluginDefinition['label'],
+          'weight' => $weight,
+        ));
+      $weight++;
+    }
+    $this->configuration['regions'] = $this->getLayoutRegions()->getConfiguration();
+    return $this->getLayoutRegions();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLayoutRegions() {
+    if (!isset($this->layoutRegionBag) || !$this->layoutRegionBag) {
+      if (!isset($this->configuration['regions'])) {
+        return $this->initializeLayoutRegionsFromLayout($this->getLayout());
+      }
+
+      $regions_data = $this->configuration['regions'];
+      $this->layoutRegionBag = new LayoutRegionPluginBag(Layout::layoutRegionPluginManager(),
+        $regions_data
+      );
+
+      $this->layoutRegionBag->sort();
+    }
+    return $this->layoutRegionBag;
+  }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    if (isset($this->configuration['widget_layout']) && !empty($this->configuration['widget_blocks_config'])) {
-      $output = array();
-
-      $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['widget_layout']);
-      // @todo: use the layout.
-      foreach ($layout->getRegionNames() as $region_id => $region_name) {
-        $block_config = $this->configuration['widget_blocks_config'][$region_id]['block_settings'];
-        $block_id = $this->configuration['widget_blocks_config'][$region_id]['block_id'];
-        $block_plugin_bag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $block_id, $block_config, $block_id);
-        $block = $block_plugin_bag->get($block_id);
-
-        if ($block->access(\Drupal::currentUser())) {
-          $row = $block->build();
-          $block_name = drupal_html_class("block-$block_id}");
-          $row['#prefix'] = '<div class="' . $block_name . '">';
-          $row['#suffix'] = '</div>';
-          $output[] = $row;
-        }
-      }
-
-      return $output;
+    if (isset($this->configuration['layout']) && !empty($this->configuration['blocks'])) {
+      $renderer = new LayoutRendererBlockAndContext(\Drupal::service('context.handler'), \Drupal::currentUser());
+      return $renderer->build($this->getLayout(), $this);
     }
+    return array();
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
-
-    if (!isset($form_state['block_count'])) {
-      $form_state['block_count'] = 1;
-    }
-
     $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
 
     $block_options = array();
@@ -82,8 +130,8 @@ class WidgetBlock extends BlockBase {
       $block_options[(string) $block_definition['category']][$plugin_id] = (string) $block_definition['admin_label'];
     }
 
-    $widget_blocks = !empty($form_state['values']['settings']['blocks']) ? $form_state['values']['settings']['blocks'] : $this->configuration['widget_blocks_config'];
-    $widget_layout = !empty($form_state['values']['settings']['widget_layout']) ? $form_state['values']['settings']['widget_layout'] : $this->configuration['widget_layout'];
+    $widget_blocks = !empty($form_state['values']['settings']['blocks']) ? $form_state['values']['settings']['blocks'] : $this->configuration['blocks'];
+    $layout = !empty($form_state['values']['settings']['layout']) ? $form_state['values']['settings']['layout'] : $this->configuration['layout'];
 
     $ajax_properties =  array(
       '#ajax' => array(
@@ -97,12 +145,12 @@ class WidgetBlock extends BlockBase {
 
     $layouts = Layout::getLayoutOptions();
 
-    $form['widget_layout'] = array(
+    $form['layout'] = array(
       '#type' => 'select',
       '#required' => TRUE,
       '#title' => t('Widget layout'),
       '#options' => $layouts,
-      '#default_value' => $widget_layout,
+      '#default_value' => $layout,
     ) + $ajax_properties;
 
     $form['blocks'] = array(
@@ -111,45 +159,41 @@ class WidgetBlock extends BlockBase {
       '#suffix' => '</div>',
     );
 
-    if (!$widget_layout) {
+    if (!$layout) {
       return $form;
     }
-
-    /* @var \Drupal\layout\Plugin\Layout\LayoutInterface $layout */
-    $layout = \Drupal::service('plugin.manager.layout')->createInstance($widget_layout);
-    foreach ($layout->getRegionNames() as $region_id => $region_name) {
-      $block_config = $widget_blocks[$region_id];
+    if ($layout != $this->configuration['layout']) {
+      $this->configuration['layout'] = $layout;
+      $this->configuration['regions'] = NULL;
+      $this->layoutRegionBag = NULL;
+    }
+    foreach ($this->getLayoutRegions() as $region_id => $region_definition) {
+      $block_config = isset($widget_blocks[$region_id]) ? $widget_blocks[$region_id] : array();
       $form['blocks'][$region_id] = array(
         '#type' => 'details',
-        '#title' => $region_name,
+        '#title' => $region_definition->getConfiguration()['label'],
         '#open' => TRUE,
       );
 
-      $form['blocks'][$region_id]['block_id'] = array(
+      $form['blocks'][$region_id]['id'] = array(
         '#type' => 'select',
         '#title' => t('Block'),
         '#options' => $block_options,
         '#required' => TRUE,
-        '#default_value' => isset($block_config['block_id']) ? $block_config['block_id'] : NULL,
+        '#default_value' => isset($block_config['id']) ? $block_config['id'] : NULL,
       ) + $ajax_properties;
 
-      if (!empty($block_config['block_id'])) {
-        if (!empty($block_config['block_settings'])) {
-          $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id'], $block_config['block_settings']);
-        }
-        else {
-          $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['block_id']);
-        }
+      $form['blocks'][$region_id]['region'] = array(
+        '#type' => 'value',
+        '#value' => $region_id,
+      );
 
-        $form['blocks'][$region_id]['block_settings'] = array(
-          '#type' => 'details',
-          '#title' => t('Block settings'),
-          '#open' => FALSE,
-          'settings' => $block_plugin->buildConfigurationForm(array(), $form_state),
-        );
+      if (!empty($block_config['id'])) {
+        $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['id'], $block_config);
+        $form['blocks'][$region_id] += $block_plugin->buildConfigurationForm(array(), $form_state);
       }
       else {
-        unset($form['blocks'][$region_id]['block_settings']);
+        //unset($form['blocks'][$region_id]);
       }
     }
 
@@ -160,8 +204,8 @@ class WidgetBlock extends BlockBase {
    * @{@inheritdoc}
    */
   public function blockSubmit($form, &$form_state) {
-    $this->configuration['widget_blocks_config'] = $form_state['values']['blocks'];
-    $this->configuration['widget_layout'] = $form_state['values']['widget_layout'];
+    $this->configuration['blocks'] = $form_state['values']['blocks'];
+    $this->configuration['layout'] = $form_state['values']['layout'];
   }
 
   /**
@@ -170,5 +214,29 @@ class WidgetBlock extends BlockBase {
   public function widgetBlockAJAXCallback($form, &$form_state) {
     return $form['settings']['blocks'];
   }
+
+  protected function getBlockBag() {
+    if (!$this->blockPluginBag) {
+      $this->blockPluginBag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $this->configuration['blocks']);
+    }
+    return $this->blockPluginBag;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBlocksByRegion($region_id) {
+    $all_by_region = $this->getBlockBag()->getAllByRegion();
+    return isset($all_by_region[$region_id]) ? $all_by_region[$region_id] : array();
+  }
+
+  /**
+   * @return \Drupal\layout\Plugin\Layout\LayoutInterface
+   */
+  protected function getLayout() {
+    $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['layout']);
+    return $layout;
+  }
+
 
 }

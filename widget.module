@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Module file for the widget module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function widget_theme() {
+  return array(
+    'widget_main_with_quicktabs' => array(
+      'variables' => array('regions' => array()),
+      'template' => 'widget-main-with-quicktabs',
+    ),
+  );
+}
