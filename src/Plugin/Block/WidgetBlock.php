@@ -7,6 +7,7 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
+use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
 use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
@@ -25,6 +26,8 @@ use Drupal\page_manager\Plugin\BlockPluginBag;
  */
 
 class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInterface {
+
+  use PluginDependencyTrait;
 
   /**
    * The block manager.
@@ -239,8 +242,25 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * @return \Drupal\layout\Plugin\Layout\LayoutInterface
    */
   protected function getLayout() {
-    $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['layout']);
-    return $layout;
+    if ($this->configuration['layout']) {
+      $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['layout']);
+      return $layout;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    foreach ($this->getBlockBag() as $block) {
+      $this->calculatePluginDependencies($block);
+    }
+    if ($this->getLayout()) {
+      foreach ($this->getLayoutRegions() as $region) {
+        $this->calculatePluginDependencies($region);
+      }
+    }
+    return $this->dependencies;
   }
 
 
