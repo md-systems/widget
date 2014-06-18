@@ -3,9 +3,16 @@
     {{ regions.main }}
 
     <h2>Quicktabs</h2>
-    {{ regions.quicktab_1 }}
-    {{ regions.quicktab_2 }}
-    {{ regions.quicktab_3 }}
+    <div class="widget-tabbed-content">
+        <ul>
+            {% for tab in tabs %}
+                <li><a href="#{{ tab.id }}">{{ tab.label }}</a></li>
+            {% endfor %}
+        </ul>
+        {% for tab in tabs %}
+            <div id="{{ tab.id }}">{{ tab.content }}</div>
+        {% endfor %}
+    </div>
 
     <h2>Below</h2>
     {{ regions.below_quicktab }}

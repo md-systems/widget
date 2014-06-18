@@ -80,11 +80,11 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     $weight = 0;
     foreach ($definitions as $id => $regionPluginDefinition) {
       $this->addLayoutRegion(array(
-          'id' => !empty($regionPluginDefinition['plugin_id']) ? $regionPluginDefinition['plugin_id'] : 'default',
-          'region_id' => $id,
-          'label' => $regionPluginDefinition['label'],
-          'weight' => $weight,
-        ));
+        'id' => !empty($regionPluginDefinition['plugin_id']) ? $regionPluginDefinition['plugin_id'] : 'default',
+        'region_id' => $id,
+        'label' => $regionPluginDefinition['label'],
+        'weight' => $weight,
+      ));
       $weight++;
     }
     $this->configuration['regions'] = $this->getLayoutRegions()->getConfiguration();
@@ -116,7 +116,13 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   public function build() {
     if (isset($this->configuration['layout']) && !empty($this->configuration['blocks'])) {
       $renderer = new LayoutRendererBlockAndContext(\Drupal::service('context.handler'), \Drupal::currentUser());
-      return $renderer->build($this->getLayout(), $this);
+      $build = $renderer->build($this->getLayout(), $this);
+
+      // Add JS that builds tabs of the content if tabbed layout is selected.
+      if ($this->configuration['layout'] == 'widget_main_with_quicktabs') {
+        $build['#attached']['library'][] = 'widget/widget.tabs';
+      }
+      return $build;
     }
     return array();
   }

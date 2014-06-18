@@ -20,3 +20,28 @@ function widget_theme() {
     ),
   );
 }
+
+/**
+ * Prepares tabs data for the quicktab layout template.
+ */
+function widget_preprocess_widget_main_with_quicktabs(&$variables) {
+  $variables['tabs'] = array();
+  foreach ($variables['regions'] as $tab_id => $content) {
+    // @todo this condition is not nice, instead it should be possible to have
+    //   multiple blocks in one region.
+    // Only add blocks that are in a "tab" region.
+    if (strpos($tab_id, 'tab_')) {
+      if (!empty($variables['regions'][$tab_id]['#blocks'])) {
+        // Don't print the label as it's used as tab title label.
+        $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label_display'] = 'hidden';
+        // Add data: label and content of each tab.
+        $variables['tabs'][$tab_id] = array(
+          'label' => $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label'],
+          'content' => $variables['regions'][$tab_id]['#blocks'],
+          // @todo would maybe make sense to make this configurable.
+          'id' => 'widget-tab-' . $tab_id,
+        );
+      }
+    }
+  }
+}

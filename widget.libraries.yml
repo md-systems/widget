@@ -1,0 +1,6 @@
+widget.tabs:
+  version: VERSION
+  js:
+    js/widget.js: {}
+  dependencies:
+    - core/jquery.ui.tabs
