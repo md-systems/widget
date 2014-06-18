@@ -3,7 +3,7 @@
     {{ regions.main }}
 
     <h2>Quicktabs</h2>
-    <div class="widget-tabbed-content">
+    <div class="layout-region region-quicktabs-wrapper">
         <ul>
             {% for tab in tabs %}
                 <li><a href="#{{ tab.id }}">{{ tab.label }}</a></li>

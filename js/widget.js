@@ -2,7 +2,7 @@
 
   Drupal.behaviors.widget = {
     attach: function (context, settings) {
-      $('.widget-tabbed-content').tabs();
+      $('.region-quicktabs-wrapper').tabs();
     }
   };
 

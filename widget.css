@@ -1,0 +1,14 @@
+.widget-2col {
+  width: 50%;
+}
+
+.widget-right {
+  float:right;
+}
+.widget-left {
+  float:left;
+}
+
+.region-id-main {
+ width: 66%;
+}
