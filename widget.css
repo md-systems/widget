@@ -1,3 +1,4 @@
+/* Simple two column layout 50/50 */
 .widget-2col {
   width: 50%;
 }
@@ -9,6 +10,13 @@
   float:left;
 }
 
-.region-id-main {
- width: 66%;
+/* Quicktabs layout */
+.quicktabs-layout-column.left-col-wrapper {
+  width: 66%;
+  float: left;
+}
+
+.quicktabs-layout-column.right-col-wrapper {
+  width: 34%;
+  float: left;
 }

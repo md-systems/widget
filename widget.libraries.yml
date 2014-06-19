@@ -2,5 +2,8 @@ widget.tabs:
   version: VERSION
   js:
     js/widget.js: {}
+  css:
+    theme:
+      widget.css: {}
   dependencies:
     - core/jquery.ui.tabs

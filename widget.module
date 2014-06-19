@@ -27,8 +27,6 @@ function widget_theme() {
 function widget_preprocess_widget_main_with_quicktabs(&$variables) {
   $variables['tabs'] = array();
   foreach ($variables['regions'] as $tab_id => $content) {
-    //$variables['regions'][$tab_id]['classes'] = 'widget-region-' . drupal_clean_css_identifier($tab_id);
-
     // @todo this condition is not nice, instead it should be possible to have
     //   multiple blocks in one region.
     // Only add blocks that are in a "tab" region.
@@ -41,7 +39,7 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
           'label' => $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label'],
           'content' => $variables['regions'][$tab_id]['#blocks'],
           // @todo would maybe make sense to make this configurable.
-          'id' => 'widget-tab-' . $tab_id,
+          'id' => 'widget-tab-' . drupal_clean_css_identifier($tab_id),
         );
       }
     }
