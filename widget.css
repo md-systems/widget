@@ -12,11 +12,15 @@
 
 /* Quicktabs layout */
 .quicktabs-layout-column.left-col-wrapper {
-  width: 66%;
+  width: 60%;
   float: left;
 }
 
 .quicktabs-layout-column.right-col-wrapper {
-  width: 34%;
+  width: 40%;
   float: left;
+}
+
+.region-quicktabs-wrapper {
+  margin-bottom: 1em;
 }

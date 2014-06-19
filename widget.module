@@ -33,7 +33,7 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
     if (strpos($tab_id, 'tab_')) {
       if (!empty($variables['regions'][$tab_id]['#blocks'])) {
         // Don't print the label as it's used as tab title label.
-        $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label_display'] = 'hidden';
+        $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label_display'] = FALSE;
         // Add data: label and content of each tab.
         $variables['tabs'][$tab_id] = array(
           'label' => $variables['regions'][$tab_id]['#blocks'][0]['#configuration']['label'],

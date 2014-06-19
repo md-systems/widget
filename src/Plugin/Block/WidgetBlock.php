@@ -122,6 +122,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       if ($this->configuration['layout'] == 'widget_main_with_quicktabs') {
         $build['#attached']['library'][] = 'widget/widget.tabs';
       }
+      else {
+        $build['#attached']['css'][] = drupal_get_path('module', 'widget') . '/widget.css';
+      }
       return $build;
     }
     return array();
