@@ -41,7 +41,9 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
           // @todo would maybe make sense to make this configurable.
           'id' => 'widget-tab-' . drupal_clean_css_identifier($tab_id),
         );
+
       }
     }
   }
+  ksort($variables['tabs']);
 }

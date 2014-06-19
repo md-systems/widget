@@ -6,4 +6,5 @@ widget.tabs:
     theme:
       widget.css: {}
   dependencies:
+    - core/drupal
     - core/jquery.ui.tabs

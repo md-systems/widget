@@ -133,7 +133,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function blockForm($form, &$form_state) {
     $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
 
     $block_options = array();
@@ -153,7 +153,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       ),
     );
 
-    $form = parent::buildConfigurationForm($form, $form_state);
+    $form = parent::blockForm($form, $form_state);
 
     $layouts = array();
     foreach (Layout::layoutPluginManager()->getDefinitions() as $id => $definition) {
@@ -196,8 +196,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
         '#type' => 'select',
         '#title' => t('Block'),
         '#options' => $block_options,
-        //'#required' => TRUE,
         '#default_value' => isset($block_config['id']) ? $block_config['id'] : NULL,
+        '#empty_option' => t('- None -'),
       ) + $ajax_properties;
 
       $form['blocks'][$region_id]['region'] = array(
@@ -225,8 +225,15 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * @{@inheritdoc}
    */
   public function blockSubmit($form, &$form_state) {
-    $this->configuration['blocks'] = $form_state['values']['blocks'];
+    $this->configuration['blocks'] = array();
     $this->configuration['layout'] = $form_state['values']['layout'];
+    // Set empty block ID's to NULL.
+    foreach ($form_state['values']['blocks'] as $region_id => $block) {
+      if (!empty($block['id'])) {
+        $this->configuration['blocks'][$region_id] = $block;
+      }
+    }
+
   }
 
   /**
