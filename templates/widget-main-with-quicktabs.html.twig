@@ -1,11 +1,9 @@
 <div class="layout">
     <div class="quicktabs-layout-column left-col-wrapper">
-        <h2>Main</h2>
         {{ regions.main }}
     </div>
 
     <div class="quicktabs-layout-column right-col-wrapper">
-        <h2>Quicktabs</h2>
         <div class="layout-region region-quicktabs-wrapper">
             <ul>
                 {% for tab in tabs %}
@@ -17,7 +15,6 @@
             {% endfor %}
         </div>
 
-        <h2>Below</h2>
         {{ regions.below_quicktab }}
     </div>
 
