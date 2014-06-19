@@ -205,6 +205,10 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       if (!empty($block_config['id'])) {
         $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['id'], $block_config);
         $form['blocks'][$region_id] += $block_plugin->buildConfigurationForm(array(), $form_state);
+        // @todo Support per-block caching and visibility. Breaks UI right now.
+        unset($form['blocks'][$region_id]['cache']);
+        unset($form['blocks'][$region_id]['visibility']);
+        unset($form['blocks'][$region_id]['visibility_tabs']);
       }
       else {
         //unset($form['blocks'][$region_id]);
