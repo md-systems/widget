@@ -18,6 +18,10 @@ function widget_theme() {
       'variables' => array('regions' => array()),
       'template' => 'widget-2col',
     ),
+    'widget_section_header' => array(
+      'variables' => array('regions' => array()),
+      'template' => 'widget-section-header',
+    ),
   );
 }
 

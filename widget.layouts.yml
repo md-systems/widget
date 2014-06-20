@@ -34,3 +34,14 @@ widget_2col:
       label: Left
     right:
       label: right
+
+widget_section_header:
+  label: Section header
+  category: Widget
+  type: partial
+  theme: widget_section_header
+  regions:
+    heading:
+      label: Section heading
+    navigation:
+      label: Links

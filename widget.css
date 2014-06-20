@@ -24,3 +24,46 @@
 .region-quicktabs-wrapper {
   margin-bottom: 1em;
 }
+
+/* Section header layout */
+.widget-section-header {
+  background-color: #363636;
+  width: 100%;
+  min-height: 40px;
+}
+
+.widget-section-header a {
+  color: #FFFFFF;
+}
+
+.widget-title {
+  float: left;
+  width: 30%;
+}
+
+.widget-navigation {
+  width: 70%;
+  float: left;
+}
+
+.region-id-navigation {
+  float: right;
+}
+
+.region-id-navigation .menu {
+  margin: 7px 10px 7px 0;
+}
+
+.region-id-navigation .menu li {
+  display: inline;
+  padding: 0 0.5em;
+  border-right: 1px solid #FFFFFF;
+}
+
+.region-id-navigation .menu li:last-child {
+  border-right: 0;
+}
+
+.region-id-navigation .menu li a {
+  font-weight: bold;
+}
