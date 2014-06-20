@@ -7,13 +7,17 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
+use Drupal\Component\Plugin\ContextAwarePluginInterface;
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
 use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
 use Drupal\layout\Plugin\Layout\LayoutInterface;
 use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag;
+use Drupal\page_manager\Entity\Page;
 use Drupal\page_manager\Plugin\BlockPluginBag;
+use Drupal\page_manager\Plugin\ContextAwarePluginAssignmentTrait;
 
 /**
  * Provides a 'widget' block.
@@ -28,6 +32,14 @@ use Drupal\page_manager\Plugin\BlockPluginBag;
 class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInterface {
 
   use PluginDependencyTrait;
+  use ContextAwarePluginAssignmentTrait;
+
+  /**
+   * The page executable.
+   *
+   * @var \Drupal\page_manager\PageExecutable
+   */
+  protected $page;
 
   /**
    * The block manager.
@@ -50,6 +62,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public $layoutRegionBag;
 
+  /**
+   * {@inheritdoc}
+   */
   public function defaultConfiguration() {
     return array(
       'blocks' => array(),
@@ -61,7 +76,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * {@inheritdoc}
    */
   protected function addLayoutRegion(array $configuration) {
-    // layout regions expect to have a UUID.
+    // Layout regions expect to have a UUID.
     $configuration['uuid'] = $configuration['region_id'];
     $this->getLayoutRegions()->addInstanceId($configuration['region_id'], $configuration);
     return $configuration['region_id'];
@@ -115,6 +130,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public function build() {
     if (isset($this->configuration['layout']) && !empty($this->configuration['blocks'])) {
+
       $renderer = new LayoutRendererBlockAndContext(\Drupal::service('context.handler'), \Drupal::currentUser());
       $build = $renderer->build($this->getLayout(), $this);
 
@@ -135,7 +151,14 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * {@inheritdoc}
    */
   public function blockForm($form, &$form_state) {
-    $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts(array());
+    // Fish the page object from the form args.
+    foreach ($form_state['build_info']['args'] as $arg) {
+      if ($arg instanceof Page) {
+        $this->page = $arg->getExecutable();
+      }
+    }
+
+    $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts($this->getContexts());
 
     $block_options = array();
 
@@ -146,7 +169,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     $widget_blocks = !empty($form_state['values']['settings']['blocks']) ? $form_state['values']['settings']['blocks'] : $this->configuration['blocks'];
     $layout = !empty($form_state['values']['settings']['layout']) ? $form_state['values']['settings']['layout'] : $this->configuration['layout'];
 
-    $ajax_properties =  array(
+    $ajax_properties = array(
       '#ajax' => array(
         'callback' => array($this, 'widgetBlockAJAXCallback'),
         'wrapper' => 'widget-block-wrapper',
@@ -209,6 +232,11 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       if (!empty($block_config['id'])) {
         $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['id'], $block_config);
         $form['blocks'][$region_id] += $block_plugin->buildConfigurationForm(array(), $form_state);
+
+        if ($block_plugin instanceof ContextAwarePluginInterface) {
+          $form['blocks'][$region_id]['context_mapping'] = $this->addContextAssignmentElement($block_plugin, $this->getContexts());
+        }
+
         // @todo Support per-block caching and visibility. Breaks UI right now.
         unset($form['blocks'][$region_id]['cache']);
         unset($form['blocks'][$region_id]['visibility']);
@@ -267,6 +295,21 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       $layout = \Drupal::service('plugin.manager.layout')->createInstance($this->configuration['layout']);
       return $layout;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContexts() {
+    // In the form, we have the page executable assigned directly.
+    if ($this->page) {
+      return $this->page->getContexts();
+    }
+    // If we are on a page manager page, return the available context.
+    if (\Drupal::request()->attributes->has('page')) {
+      return \Drupal::request()->attributes->get('page')->getContexts();
+    }
+    return parent::getContexts();
   }
 
   /**
