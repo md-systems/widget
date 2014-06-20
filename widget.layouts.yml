@@ -21,8 +21,6 @@ widget_1col:
   type: partial
   theme: widget_1col
   regions:
-    links:
-      label: Links
     main:
       label: Main
 
@@ -32,8 +30,6 @@ widget_2col:
   type: partial
   theme: widget_2col
   regions:
-    links:
-      label: Links
     left:
       label: Left
     right:
@@ -45,8 +41,6 @@ widget_3col:
   type: partial
   theme: widget_3col
   regions:
-    links:
-      label: Links
     left:
       label: Left
     right_1:

@@ -7,6 +7,7 @@
 .widget-right {
   float: right;
 }
+
 .widget-left {
   float: left;
 }
@@ -31,50 +32,4 @@
 
 .region-quicktabs-wrapper {
   margin-bottom: 1em;
-}
-
-/* Section header layout */
-.widget-section-header {
-  background-color: #363636;
-  width: 100%;
-  min-height: 40px;
-  margin-bottom: 25px;
-}
-
-.widget-section-header a {
-  color: #FFFFFF;
-}
-
-.widget-title {
-  float: left;
-  width: 30%;
-  color: #FFFFFF;
-  padding-left: 0.25em;
-}
-
-.widget-links {
-  width: 70%;
-  float: left;
-}
-
-.region-id-links {
-  float: right;
-}
-
-.region-id-links .menu {
-  margin: 7px 10px 7px 0;
-}
-
-.region-id-links .menu li {
-  display: inline;
-  padding: 0 0.5em;
-  border-right: 1px solid #FFFFFF;
-}
-
-.region-id-links .menu li:last-child {
-  border-right: 0;
-}
-
-.region-id-links .menu li a {
-  font-weight: bold;
 }
