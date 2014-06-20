@@ -41,29 +41,29 @@
   width: 30%;
 }
 
-.widget-navigation {
+.widget-links {
   width: 70%;
   float: left;
 }
 
-.region-id-navigation {
+.region-id-links {
   float: right;
 }
 
-.region-id-navigation .menu {
+.region-id-links .menu {
   margin: 7px 10px 7px 0;
 }
 
-.region-id-navigation .menu li {
+.region-id-links .menu li {
   display: inline;
   padding: 0 0.5em;
   border-right: 1px solid #FFFFFF;
 }
 
-.region-id-navigation .menu li:last-child {
+.region-id-links .menu li:last-child {
   border-right: 0;
 }
 
-.region-id-navigation .menu li a {
+.region-id-links .menu li a {
   font-weight: bold;
 }

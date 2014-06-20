@@ -15,12 +15,8 @@ function widget_theme() {
       'template' => 'widget-main-with-quicktabs',
     ),
     'widget_2col' => array(
-      'variables' => array('regions' => array()),
+      'variables' => array('regions' => array(), 'label' => NULL),
       'template' => 'widget-2col',
-    ),
-    'widget_section_header' => array(
-      'variables' => array('regions' => array()),
-      'template' => 'widget-section-header',
     ),
   );
 }
@@ -50,4 +46,22 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
     }
   }
   ksort($variables['tabs']);
+}
+
+/**
+ * Alters label display for widget blocks with certain layouts.
+ *
+ * Moves the label into the links region or unsets that region if label display
+ * is disabled.
+ */
+function widget_preprocess_block(&$variables) {
+  if ($variables['plugin_id'] == 'widget_block' && in_array($variables['configuration']['layout'], array('widget_1col', 'widget_2col'))) {
+    if ($variables['configuration']['label_display']) {
+      $variables['content']['#label'] = $variables['label'];
+      $variables['label'] = NULL;
+    }
+    else {
+      unset($variables['content']['#regions']['links']);
+    }
+  }
 }
