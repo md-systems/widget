@@ -1,13 +1,21 @@
 /* Simple two column layout 50/50 */
-.widget-2col {
+.widget-2col,
+.widget-left {
   width: 50%;
 }
 
 .widget-right {
-  float:right;
+  float: right;
 }
 .widget-left {
-  float:left;
+  float: left;
+}
+
+/* Three column layout 50/25/25 */
+.widget-right-first,
+.widget-right-second {
+  width: 25%;
+  float: left;
 }
 
 /* Quicktabs layout */
@@ -30,6 +38,7 @@
   background-color: #363636;
   width: 100%;
   min-height: 40px;
+  margin-bottom: 25px;
 }
 
 .widget-section-header a {
@@ -39,6 +48,8 @@
 .widget-title {
   float: left;
   width: 30%;
+  color: #FFFFFF;
+  padding-left: 0.25em;
 }
 
 .widget-links {

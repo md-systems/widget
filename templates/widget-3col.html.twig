@@ -5,7 +5,10 @@
             <nav class="widget-links">{{ regions.links }}</nav>
         </header>
     {% endif %}
-    <section class="widget-left widget-2col">{{ regions.left }}</section>
-    <section class="widget-right widget-2col">{{ regions.right }}</section>
+    <div class="widget-3col-wrapper">
+        <section class="widget-left">{{ regions.left }}</section>
+        <section class="widget-right-first">{{ regions.right_1 }}</section>
+        <section class="widget-right-second">{{ regions.right_2 }}</section>
+    </div>
     <div class="clearfix"></div>
 </section>

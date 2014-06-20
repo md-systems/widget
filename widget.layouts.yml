@@ -38,3 +38,18 @@ widget_2col:
       label: Left
     right:
       label: Right
+
+widget_3col:
+  label: Three columns
+  category: Widget
+  type: partial
+  theme: widget_3col
+  regions:
+    links:
+      label: Links
+    left:
+      label: Left
+    right_1:
+      label: Right first
+    right_2:
+      label: Right second
