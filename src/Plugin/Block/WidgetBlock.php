@@ -306,8 +306,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       return $this->page->getContexts();
     }
     // If we are on a page manager page, return the available context.
-    if (\Drupal::request()->attributes->has('page')) {
-      return \Drupal::request()->attributes->get('page')->getContexts();
+    if (\Drupal::request()->attributes->has('_page')) {
+      return \Drupal::request()->attributes->get('_page')->getContexts();
     }
     return parent::getContexts();
   }
