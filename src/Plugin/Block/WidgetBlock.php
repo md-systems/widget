@@ -8,7 +8,6 @@ namespace Drupal\widget\Plugin\Block;
 
 use Drupal\block\BlockBase;
 use Drupal\Component\Plugin\ContextAwarePluginInterface;
-use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
@@ -18,6 +17,7 @@ use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag;
 use Drupal\page_manager\Entity\Page;
 use Drupal\page_manager\Plugin\BlockPluginBag;
 use Drupal\page_manager\Plugin\ContextAwarePluginAssignmentTrait;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a 'widget' block.
@@ -150,7 +150,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
-  public function blockForm($form, &$form_state) {
+  public function blockForm($form, FormStateInterface $form_state) {
     // Fish the page object from the form args.
     foreach ($form_state['build_info']['args'] as $arg) {
       if ($arg instanceof Page) {
@@ -253,7 +253,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * @{@inheritdoc}
    */
-  public function blockSubmit($form, &$form_state) {
+  public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['blocks'] = array();
     $this->configuration['layout'] = $form_state['values']['layout'];
     // Set empty block ID's to NULL.
@@ -268,7 +268,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * Used by select widgets of block configuration form.
    */
-  public function widgetBlockAJAXCallback($form, &$form_state) {
+  public function widgetBlockAJAXCallback($form, FormStateInterface $form_state) {
     return $form['settings']['blocks'];
   }
 
