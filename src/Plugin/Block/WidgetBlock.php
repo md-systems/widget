@@ -171,7 +171,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
 
     $ajax_properties = array(
       '#ajax' => array(
-        'callback' => array($this, 'widgetBlockAJAXCallback'),
+        'callback' => '::widgetBlockAJAXCallback',
         'wrapper' => 'widget-block-wrapper',
         'effect' => 'fade',
       ),
