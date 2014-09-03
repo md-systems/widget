@@ -6,8 +6,8 @@
 
 namespace Drupal\widget\Plugin\Block;
 
-use Drupal\block\BlockBase;
 use Drupal\Component\Plugin\ContextAwarePluginInterface;
+use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
