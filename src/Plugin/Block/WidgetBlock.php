@@ -152,7 +152,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public function blockForm($form, FormStateInterface $form_state) {
     // Fish the page object from the form args.
-    foreach ($form_state['build_info']['args'] as $arg) {
+
+    foreach ($form_state->getBuildInfo()['args'] as $arg) {
       if ($arg instanceof Page) {
         $this->page = $arg->getExecutable();
       }
@@ -166,8 +167,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       $block_options[(string) $block_definition['category']][$plugin_id] = (string) $block_definition['admin_label'];
     }
 
-    $widget_blocks = !empty($form_state['values']['settings']['blocks']) ? $form_state['values']['settings']['blocks'] : $this->configuration['blocks'];
-    $layout = !empty($form_state['values']['settings']['layout']) ? $form_state['values']['settings']['layout'] : $this->configuration['layout'];
+    $widget_blocks = $form_state->hasValue(array('values', 'settings', 'blocks')) ? $form_state->getValue(array('values', 'settings', 'blocks')) : $this->configuration['blocks'];
+    $layout = $form_state->hasValue(array('values', 'settings', 'layout')) ? $form_state->getValue(array('values', 'settings', 'layout')) : $this->configuration['layout'];
 
     $ajax_properties = array(
       '#ajax' => array(
@@ -255,9 +256,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['blocks'] = array();
-    $this->configuration['layout'] = $form_state['values']['layout'];
+    $this->configuration['layout'] = $form_state->getValue('layout');
     // Set empty block ID's to NULL.
-    foreach ($form_state['values']['blocks'] as $region_id => $block) {
+    foreach ($form_state->getValue('blocks') as $region_id => $block) {
       if (!empty($block['id'])) {
         $this->configuration['blocks'][$region_id] = $block;
       }
@@ -306,8 +307,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       return $this->page->getContexts();
     }
     // If we are on a page manager page, return the available context.
-    if (\Drupal::request()->attributes->has('_page')) {
-      return \Drupal::request()->attributes->get('_page')->getContexts();
+    if (\Drupal::request()->attributes->has('page_manager_page')) {
+      return \Drupal::request()->attributes->get('page_manager_page')->getContexts();
     }
     return parent::getContexts();
   }
