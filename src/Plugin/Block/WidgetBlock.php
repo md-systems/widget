@@ -167,12 +167,12 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       $block_options[(string) $block_definition['category']][$plugin_id] = (string) $block_definition['admin_label'];
     }
 
-    $widget_blocks = $form_state->hasValue(array('values', 'settings', 'blocks')) ? $form_state->getValue(array('values', 'settings', 'blocks')) : $this->configuration['blocks'];
-    $layout = $form_state->hasValue(array('values', 'settings', 'layout')) ? $form_state->getValue(array('values', 'settings', 'layout')) : $this->configuration['layout'];
+    $widget_blocks = $form_state->hasValue(array('settings', 'blocks')) ? $form_state->getValue(array('settings', 'blocks')) : $this->configuration['blocks'];
+    $layout = $form_state->hasValue(array('settings', 'layout')) ? $form_state->getValue(array('settings', 'layout')) : $this->configuration['layout'];
 
     $ajax_properties = array(
       '#ajax' => array(
-        'callback' => '::widgetBlockAJAXCallback',
+        'callback' => array($this, 'widgetBlockAJAXCallback'),
         'wrapper' => 'widget-block-wrapper',
         'effect' => 'fade',
       ),
