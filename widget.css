@@ -11,6 +11,14 @@
   float: left;
 }
 
+/* Simple two column layout 66/33 */
+.widget-2col-2 {
+  width: 67%;
+}
+.widget-2col-1 {
+  width: 33%;
+}
+
 /* Three column layout 50/25/25 */
 .widget-right-first,
 .widget-right-second {

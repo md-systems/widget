@@ -22,6 +22,10 @@ function widget_theme() {
       'variables' => array('regions' => array(), 'label' => NULL),
       'template' => 'widget-2col',
     ),
+    'widget_2col_2_1' => array(
+      'variables' => array('regions' => array(), 'label' => NULL),
+      'template' => 'widget-2col-2-1',
+    ),
     'widget_3col' => array(
       'variables' => array('regions' => array(), 'label' => NULL),
       'template' => 'widget-3col',
@@ -63,7 +67,7 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
  * is disabled.
  */
 function widget_preprocess_block(&$variables) {
-  if ($variables['plugin_id'] == 'widget_block' && in_array($variables['configuration']['layout'], array('widget_1col', 'widget_2col', 'widget_3col'))) {
+  if ($variables['plugin_id'] == 'widget_block' && in_array($variables['configuration']['layout'], array('widget_1col', 'widget_2col', 'widget_2col_2_1', 'widget_3col'))) {
     if ($variables['configuration']['label_display']) {
       $variables['content']['#label'] = $variables['label'];
       $variables['label'] = NULL;

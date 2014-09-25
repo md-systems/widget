@@ -39,6 +39,19 @@ widget_2col:
     right:
       label: Right
 
+widget_2col_2_1:
+  label: Two columns 67/33
+  category: Widget
+  type: partial
+  theme: widget_2col_2_1
+  regions:
+    links:
+      label: Links
+    left:
+      label: Left
+    right:
+      label: Right
+
 widget_3col:
   label: Three columns
   category: Widget
