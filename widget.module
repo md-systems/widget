@@ -69,7 +69,9 @@ function widget_preprocess_widget_main_with_quicktabs(&$variables) {
 function widget_preprocess_block(&$variables) {
   if ($variables['plugin_id'] == 'widget_block' && in_array($variables['configuration']['layout'], array('widget_1col', 'widget_2col', 'widget_2col_2_1', 'widget_3col'))) {
     if ($variables['configuration']['label_display']) {
-      $variables['content']['#label'] = $variables['label'];
+      $variables['content']['#label'] = isset($variables['elements']['content']['#regions']['main']['#blocks'][0]['content']['#widget_title']) ?
+        $variables['elements']['content']['#regions']['main']['#blocks'][0]['content']['#widget_title'] :
+        $variables['label'];
       $variables['label'] = NULL;
     }
     else {
