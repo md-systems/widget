@@ -310,7 +310,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     if (\Drupal::request()->attributes->has('page_manager_page')) {
       return \Drupal::request()->attributes->get('page_manager_page')->getContexts();
     }
-    return parent::getContexts();
+    return (array) parent::getContexts();
   }
 
   /**
