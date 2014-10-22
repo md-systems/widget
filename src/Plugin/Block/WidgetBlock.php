@@ -169,6 +169,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
 
     $widget_blocks = $form_state->hasValue(array('settings', 'blocks')) ? $form_state->getValue(array('settings', 'blocks')) : $this->configuration['blocks'];
     $layout = $form_state->hasValue(array('settings', 'layout')) ? $form_state->getValue(array('settings', 'layout')) : $this->configuration['layout'];
+    $classes = $form_state->hasValue(array('settings', 'classes')) ? $form_state->getValue(array('settings', 'classes')) : $this->configuration['classes'];
 
     $ajax_properties = array(
       '#ajax' => array(
@@ -199,6 +200,12 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       '#type' => 'container',
       '#prefix' => '<div id="widget-block-wrapper">',
       '#suffix' => '</div>',
+    );
+
+    $form['classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('CSS Classes'),
+      '#default_value' => $classes,
     );
 
     if (!$layout) {
@@ -257,6 +264,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['blocks'] = array();
     $this->configuration['layout'] = $form_state->getValue('layout');
+    $this->configuration['classes'] = $form_state->getValue('classes');
     // Set empty block ID's to NULL.
     foreach ($form_state->getValue('blocks') as $region_id => $block) {
       if (!empty($block['id'])) {
