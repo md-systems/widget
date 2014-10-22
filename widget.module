@@ -77,5 +77,8 @@ function widget_preprocess_block(&$variables) {
     else {
       unset($variables['content']['#regions']['links']);
     }
+    if(isset($variables['configuration']['classes'])) {
+      $variables['classes'] = $variables['configuration']['classes'];
+    }
   }
 }
