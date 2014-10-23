@@ -13,9 +13,9 @@ use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
 use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
 use Drupal\layout\Plugin\Layout\LayoutInterface;
-use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag;
+use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection;
 use Drupal\page_manager\Entity\Page;
-use Drupal\page_manager\Plugin\BlockPluginBag;
+use Drupal\page_manager\Plugin\BlockPluginCollection;
 use Drupal\page_manager\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -51,14 +51,14 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * The plugin bag that holds the block plugins.
    *
-   * @var \Drupal\page_manager\Plugin\BlockPluginBag
+   * @var \Drupal\page_manager\Plugin\BlockPluginCollection
    */
-  protected $blockPluginBag;
+  protected $blockPluginCollection;
 
   /**
    * Layout regions.
    *
-   * @var \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag
+   * @var \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection
    */
   public $layoutRegionBag;
 
@@ -87,7 +87,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    *
    * @param \Drupal\layout\Plugin\Layout\LayoutInterface $layout
    *
-   * @return \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginBag
+   * @return \Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection
    */
   protected function initializeLayoutRegionsFromLayout(LayoutInterface $layout) {
     $this->configuration['regions'] = array();
@@ -116,7 +116,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       }
 
       $regions_data = $this->configuration['regions'];
-      $this->layoutRegionBag = new LayoutRegionPluginBag(Layout::layoutRegionPluginManager(),
+      $this->layoutRegionBag = new LayoutRegionPluginCollection(Layout::layoutRegionPluginManager(),
         $regions_data
       );
 
@@ -274,10 +274,10 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   }
 
   protected function getBlockBag() {
-    if (!$this->blockPluginBag) {
-      $this->blockPluginBag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $this->configuration['blocks']);
+    if (!$this->blockPluginCollection) {
+      $this->blockPluginCollection = new BlockPluginCollection(\Drupal::service('plugin.manager.block'), $this->configuration['blocks']);
     }
-    return $this->blockPluginBag;
+    return $this->blockPluginCollection;
   }
 
   /**
