@@ -1,21 +1,19 @@
 <section class="layout">
-    <article class="quicktabs-layout-column left-col-wrapper">
-        {{ regions.main }}
+  <article class="quicktabs-layout-column left-col-wrapper">
+    {{ regions.main }}
+  </article>
+  <section class="quicktabs-layout-column right-col-wrapper">
+    <article class="layout-region region-quicktabs-wrapper">
+      <ul>
+        {% for tab in tabs %}
+          <li><a href="#{{ tab.id }}">{{ tab.label }}</a></li>
+        {% endfor %}
+      </ul>
+      {% for tab in tabs %}
+        <div id="{{ tab.id }}">{{ tab.content }}</div>
+      {% endfor %}
     </article>
-
-    <section class="quicktabs-layout-column right-col-wrapper">
-        <article class="layout-region region-quicktabs-wrapper">
-            <ul>
-                {% for tab in tabs %}
-                    <li><a href="#{{ tab.id }}">{{ tab.label }}</a></li>
-                {% endfor %}
-            </ul>
-            {% for tab in tabs %}
-                <div id="{{ tab.id }}">{{ tab.content }}</div>
-            {% endfor %}
-        </article>
-
-        {{ regions.below_quicktab }}
-    </section>
-
+    {{ regions.below_quicktab }}
+  </section>
+  <div class="clearfix"></div>
 </section>
