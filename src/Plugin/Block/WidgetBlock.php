@@ -7,11 +7,13 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\PluginDependencyTrait;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
 use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
@@ -356,6 +358,24 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       $cache_keys = array_merge($cache_keys, $block->getCacheKeys());
     }
     return $cache_keys;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access(AccountInterface $account) {
+    $contexts = $this->getContexts();
+
+    $result = AccessResult::allowed();
+    // @todo This will deny access to the whole widget if one block is not
+    // accessible, correct thing to do?
+    foreach ($this->getBlockBag() as $block) {
+      if ($block instanceof ContextAwarePluginInterface) {
+        \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+      }
+      $result = $result->andIf($block->access($account));
+    }
+    return $result;
   }
 
 }
