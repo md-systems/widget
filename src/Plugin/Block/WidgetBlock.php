@@ -6,8 +6,11 @@
 
 namespace Drupal\widget\Plugin\Block;
 
-use Drupal\Component\Plugin\ContextAwarePluginInterface;
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\layout\Layout;
 use Drupal\layout\LayoutRendererBlockAndContext;
@@ -15,9 +18,10 @@ use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
 use Drupal\layout\Plugin\Layout\LayoutInterface;
 use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection;
 use Drupal\page_manager\Entity\Page;
+use Drupal\page_manager\PageExecutable;
 use Drupal\page_manager\Plugin\BlockPluginCollection;
-use Drupal\page_manager\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a 'widget' block.
@@ -328,5 +332,22 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     return $this->dependencies;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheKeys() {
+    $cache_keys = parent::getCacheKeys();
+
+    $contexts = $this->getContexts();
+    foreach ($this->getBlockBag() as $block) {
+
+      if ($block instanceof ContextAwarePluginInterface) {
+        \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+      }
+
+      $cache_keys = array_merge($cache_keys, $block->getCacheKeys());
+    }
+    return $cache_keys;
+  }
 
 }
