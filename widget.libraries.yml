@@ -1,10 +1,10 @@
-widget.tabs:
-  version: VERSION
+tabs:
   js:
     js/widget.js: {}
-  css:
-    theme:
-      widget.css: {}
   dependencies:
     - core/drupal
     - core/jquery.ui.tabs
+css:
+  css:
+    theme:
+      widget.css: {}

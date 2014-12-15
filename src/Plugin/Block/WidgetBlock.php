@@ -139,14 +139,11 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
 
       $renderer = new LayoutRendererBlockAndContext(\Drupal::service('context.handler'), \Drupal::currentUser());
       $build = $renderer->build($this->getLayout(), $this);
+      $build['#attached']['library'][] = 'widget/css';
 
       // Add JS that builds tabs of the content if tabbed layout is selected.
       if ($this->configuration['layout'] == 'widget_main_with_quicktabs') {
-        $build['#attached']['library'][] = 'widget/widget.tabs';
-      }
-      // Otherwise just add the CSS.
-      else {
-        $build['#attached']['css'][] = drupal_get_path('module', 'widget') . '/widget.css';
+        $build['#attached']['library'][] = 'widget/tabs';
       }
       return $build;
     }
