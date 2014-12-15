@@ -39,6 +39,21 @@ widget_2col:
     right:
       label: Right
 
+widget_2col_2:
+  label: Two columns - Expanded
+  category: Widget
+  type: partial
+  theme: widget_2col_2
+  regions:
+    links:
+      label: Links
+    left:
+      label: Left
+    top_right:
+      label: Top right
+    bottom_right:
+      label: Bottom right
+
 widget_2col_2_1:
   label: Two columns 67/33
   category: Widget
