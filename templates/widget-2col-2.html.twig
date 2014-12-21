@@ -1,0 +1,14 @@
+<section class="layout">
+    {% if label %}
+        <header class="widget-section-header">
+            <h1 class="widget-title">{{ label }}</h1>
+            <nav class="widget-links">{{ regions.links }}</nav>
+        </header>
+    {% endif %}
+    <section class="widget-left widget-2col-2">{{ regions.left }}</section>
+    <section class="widget-right widget-2col-1">
+        <div class="widget-top-right">{{ regions.top_right }}</div>
+        <div class="widget-bottom-right">{{ regions.bottom_right }}</div>
+    </section>
+    <div class="clearfix"></div>
+</section>
