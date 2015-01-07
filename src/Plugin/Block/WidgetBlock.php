@@ -364,13 +364,16 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     $contexts = $this->getContexts();
 
     $result = AccessResult::allowed();
-    // @todo This will deny access to the whole widget if one block is not
-    // accessible, correct thing to do?
-    foreach ($this->getBlockBag() as $block) {
-      if ($block instanceof ContextAwarePluginInterface) {
-        \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+    // @todo How to determine visibiliy of the whole widget? For now, look for
+    //   the "primary" inner block, assume either "main" or "left".
+    foreach ($this->getBlockBag() as $region => $block) {
+      if (in_array($region, ['main', 'eft'])) {
+        if ($block instanceof ContextAwarePluginInterface) {
+          \Drupal::service('context.handler')
+            ->applyContextMapping($block, $contexts);
+        }
+        $result = $result->andIf($block->access($account));
       }
-      $result = $result->andIf($block->access($account));
     }
     return $result;
   }
