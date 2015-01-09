@@ -7,6 +7,7 @@
 namespace Drupal\widget\Plugin\Block;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Block\BlockBase;
@@ -349,7 +350,13 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     foreach ($this->getBlockBag() as $block) {
 
       if ($block instanceof ContextAwarePluginInterface) {
-        \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+          try {
+            \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+          }
+          catch (ContextException $e) {
+            // Ignore blocks that fail to apply context.
+            continue;
+          }
       }
 
       $cache_keys = array_merge($cache_keys, $block->getCacheKeys());
@@ -369,8 +376,14 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     foreach ($this->getBlockBag() as $region => $block) {
       if (in_array($region, ['main', 'eft'])) {
         if ($block instanceof ContextAwarePluginInterface) {
-          \Drupal::service('context.handler')
-            ->applyContextMapping($block, $contexts);
+
+          try {
+            \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+          }
+          catch (ContextException $e) {
+            // Deny access if context is missing.
+            return AccessResult::forbidden();
+          }
         }
         $result = $result->andIf($block->access($account));
       }
