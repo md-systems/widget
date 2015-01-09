@@ -1,4 +1,4 @@
-<section class="layout">
+<div class="layout">
     {% if label %}
         <header class="widget-section-header">
             <h1 class="widget-title">{{ label }}</h1>
@@ -6,9 +6,9 @@
         </header>
     {% endif %}
     <div class="widget-3col-wrapper">
-        <section class="widget-left">{{ regions.left }}</section>
-        <section class="widget-right-first">{{ regions.right_1 }}</section>
-        <section class="widget-right-second">{{ regions.right_2 }}</section>
+        <div class="widget-left">{{ regions.left }}</div>
+        <div class="widget-right-first">{{ regions.right_1 }}</div>
+        <div class="widget-right-second">{{ regions.right_2 }}</div>
     </div>
     <div class="clearfix"></div>
-</section>
+</div>
