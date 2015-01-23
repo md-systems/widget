@@ -367,14 +367,14 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
-  public function access(AccountInterface $account) {
+  public function access(AccountInterface $account, $return_as_object = FALSE) {
     $contexts = $this->getContexts();
 
     $result = AccessResult::allowed();
     // @todo How to determine visibiliy of the whole widget? For now, look for
     //   the "primary" inner block, assume either "main" or "left".
     foreach ($this->getBlockBag() as $region => $block) {
-      if (in_array($region, ['main', 'eft'])) {
+      if (in_array($region, ['main', 'left'])) {
         if ($block instanceof ContextAwarePluginInterface) {
 
           try {
@@ -385,10 +385,10 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
             return AccessResult::forbidden();
           }
         }
-        $result = $result->andIf($block->access($account));
+        $result = $result->andIf($block->access($account, TRUE));
       }
     }
-    return $result;
+    return $return_as_object ? $result : $result->isAllowed();
   }
 
 }
