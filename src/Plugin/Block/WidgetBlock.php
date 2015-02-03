@@ -76,6 +76,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     return array(
       'blocks' => array(),
       'layout' => NULL,
+      'classes' => array(),
     );
   }
 
@@ -156,6 +157,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public function blockForm($form, FormStateInterface $form_state) {
     // Fish the page object from the form args.
+
+    // Prevent serialization error.
+    $form['admin_label']['#markup'] = (string) $form['admin_label']['#markup'];
 
     foreach ($form_state->getBuildInfo()['args'] as $arg) {
       if ($arg instanceof Page) {
@@ -389,6 +393,20 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       }
     }
     return $return_as_object ? $result : $result->isAllowed();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __sleep() {
+    $vars = parent::__sleep();
+
+    $unset_vars = array('page', 'layoutRegionBag');
+    foreach ($unset_vars as $unset_var) {
+      unset($vars[array_search($unset_var, $vars)]);
+    }
+
+    return $vars;
   }
 
 }
