@@ -371,6 +371,30 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
+  public function getCacheTags() {
+    $cache_tags = parent::getCacheTags();
+
+    $contexts = $this->getContexts();
+    foreach ($this->getBlockBag() as $block) {
+
+      if ($block instanceof ContextAwarePluginInterface) {
+        try {
+          \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+        }
+        catch (ContextException $e) {
+          // Ignore blocks that fail to apply context.
+          continue;
+        }
+      }
+
+      $cache_tags = array_merge($cache_tags, $block->getCacheTags());
+    }
+    return $cache_tags;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function access(AccountInterface $account, $return_as_object = FALSE) {
     $contexts = $this->getContexts();
 
