@@ -395,7 +395,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
-  public function access(AccountInterface $account, $return_as_object = FALSE) {
+  protected function blockAccess(AccountInterface $account) {
     $contexts = $this->getContexts();
 
     $result = AccessResult::allowed();
@@ -416,7 +416,7 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
         $result = $result->andIf($block->access($account, TRUE));
       }
     }
-    return $return_as_object ? $result : $result->isAllowed();
+    return $result;
   }
 
   /**
