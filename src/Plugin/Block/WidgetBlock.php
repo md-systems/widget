@@ -8,6 +8,7 @@ namespace Drupal\widget\Plugin\Block;
 
 use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
@@ -343,8 +344,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * {@inheritdoc}
    */
-  public function getCacheTags() {
-    $cache_tags = parent::getCacheTags();
+  public function getCacheContexts() {
+    // Do not call the parent since that would all cache tags of all contexts.
+    $cache_contexts = [];
 
     $contexts = $this->getContexts();
     foreach ($this->getBlockBag() as $block) {
@@ -359,7 +361,32 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
         }
       }
 
-      $cache_tags = array_merge($cache_tags, $block->getCacheTags());
+      $cache_contexts = Cache::mergeContexts($cache_contexts, $block->getCacheContexts());
+    }
+    return $cache_contexts;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    // Do not call the parent since that would all cache tags of all contexts.
+    $cache_tags = [];
+
+    $contexts = $this->getContexts();
+    foreach ($this->getBlockBag() as $block) {
+
+      if ($block instanceof ContextAwarePluginInterface) {
+        try {
+          \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+        }
+        catch (ContextException $e) {
+          // Ignore blocks that fail to apply context.
+          continue;
+        }
+      }
+
+      $cache_tags = Cache::mergeTags($cache_tags, $block->getCacheTags());
     }
     return $cache_tags;
   }
