@@ -22,6 +22,7 @@ use Drupal\layout\Plugin\Layout\LayoutInterface;
 use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection;
 use Drupal\page_manager\Entity\Page;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\page_manager\Entity\PageVariant;
 
 /**
  * Provides a 'widget' block.
@@ -41,9 +42,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
   /**
    * The page executable.
    *
-   * @var \Drupal\page_manager\PageExecutable
+   * @var \Drupal\page_manager\PageVariantInterface
    */
-  protected $page;
+  protected $pageVariant;
 
   /**
    * The block manager.
@@ -159,8 +160,8 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     $form['admin_label']['#markup'] = (string) $form['admin_label']['#markup'];
 
     foreach ($form_state->getBuildInfo()['args'] as $arg) {
-      if ($arg instanceof Page) {
-        $this->page = $arg->getExecutable();
+      if ($arg instanceof PageVariant) {
+        $this->pageVariant = $arg;
       }
     }
 
@@ -316,12 +317,12 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    */
   public function getContexts() {
     // In the form, we have the page executable assigned directly.
-    if ($this->page) {
-      return $this->page->getContexts();
+    if ($this->pageVariant) {
+      return $this->pageVariant->getContexts();
     }
     // If we are on a page manager page, return the available context.
-    if (\Drupal::request()->attributes->has('page_manager_page')) {
-      return \Drupal::request()->attributes->get('page_manager_page')->getContexts();
+    if (\Drupal::routeMatch()->getParameter('page_manager_page_variant')) {
+      return \Drupal::routeMatch()->getParameter('page_manager_page_variant')->getContexts();
     }
     return (array) parent::getContexts();
   }
