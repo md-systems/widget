@@ -392,6 +392,32 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     return $cache_tags;
   }
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge() {
+    // Do not call the parent since that would all cache tags of all contexts.
+    $max_age = Cache::PERMANENT;
+
+    $contexts = $this->getContexts();
+    foreach ($this->getBlockBag() as $block) {
+
+      if ($block instanceof ContextAwarePluginInterface) {
+        try {
+          \Drupal::service('context.handler')->applyContextMapping($block, $contexts);
+        }
+        catch (ContextException $e) {
+          // Ignore blocks that fail to apply context.
+          continue;
+        }
+      }
+
+      $max_age = Cache::mergeMaxAges($max_age, $block->getCacheMaxAge());
+    }
+    return $max_age;
+  }
+
   /**
    * {@inheritdoc}
    */
