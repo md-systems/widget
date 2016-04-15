@@ -1,0 +1,54 @@
+# Block settings schema.
+block.settings.widget_block:
+  type: block_settings
+  label: 'Widget block'
+  mapping:
+    blocks:
+      type: sequence
+      label: 'Blocks'
+      sequence:
+        - type: widget_block.block
+    layout:
+      type: string
+      label: 'Layout'
+    classes:
+      type: sequence
+      label: 'Classes'
+      sequence:
+        - type: string
+    regions:
+      type: sequence
+      label: 'Regions'
+      sequence:
+        - type: widget_block.region
+
+widget_block.block:
+  type: block.settings.[id]
+  label: 'Widget block settings'
+  mapping:
+    id:
+      type: string
+      label: 'Id'
+    region:
+      type: string
+      label: 'Region'
+
+widget_block.region:
+  type: mapping
+  label: 'Widget region settings'
+  mapping:
+    id:
+      type: string
+      label: 'Id'
+    region_id:
+      type: string
+      label: 'Region id'
+    label:
+      type: string
+      label: 'Label'
+    weight:
+      type: integer
+      label: 'Weight'
+    uuid:
+      type: string
+      label: 'Uuid'
