@@ -157,7 +157,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     // Fish the page object from the form args.
 
     // Prevent serialization error.
-    $form['admin_label']['#markup'] = (string) $form['admin_label']['#markup'];
+    if (isset($form['admin_label']['#markup'])) {
+      $form['admin_label']['#markup'] = (string) $form['admin_label']['#markup'];
+    }
 
     foreach ($form_state->getBuildInfo()['args'] as $arg) {
       if ($arg instanceof PageVariant) {
