@@ -1,0 +1,9 @@
+{
+    "name": "md-systems/widget",
+    "description": "Widget",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "require": {
+        "md-systems/layout": "dev-old"
+    }
+}
