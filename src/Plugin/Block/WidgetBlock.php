@@ -9,6 +9,7 @@ namespace Drupal\widget\Plugin\Block;
 use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
@@ -20,9 +21,7 @@ use Drupal\layout\LayoutRendererBlockAndContext;
 use Drupal\layout\Plugin\Layout\LayoutBlockAndContextProviderInterface;
 use Drupal\layout\Plugin\Layout\LayoutInterface;
 use Drupal\layout\Plugin\LayoutRegion\LayoutRegionPluginCollection;
-use Drupal\page_manager\Entity\Page;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\page_manager\Entity\PageVariant;
 
 /**
  * Provides a 'widget' block.
@@ -38,13 +37,6 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
 
   use PluginDependencyTrait;
   use ContextAwarePluginAssignmentTrait;
-
-  /**
-   * The page executable.
-   *
-   * @var \Drupal\page_manager\PageVariantInterface
-   */
-  protected $pageVariant;
 
   /**
    * The block manager.
@@ -154,19 +146,6 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {
-    // Fish the page object from the form args.
-
-    // Prevent serialization error.
-    if (isset($form['admin_label']['#markup'])) {
-      $form['admin_label']['#markup'] = (string) $form['admin_label']['#markup'];
-    }
-
-    foreach ($form_state->getBuildInfo()['args'] as $arg) {
-      if ($arg instanceof PageVariant) {
-        $this->pageVariant = $arg;
-      }
-    }
-
     $block_plugins = \Drupal::service('plugin.manager.block')->getDefinitionsForContexts($this->getContexts());
 
     $block_options = array();
@@ -318,9 +297,18 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
    * {@inheritdoc}
    */
   public function getContexts() {
-    // In the form, we have the page executable assigned directly.
-    if ($this->pageVariant) {
-      return $this->pageVariant->getContexts();
+    // When editing, attempt to get the contexts from the block display.
+    if ($block_display = \Drupal::routeMatch()->getParameter('block_display')) {
+      $cached_values = \Drupal::service('user.shared_tempstore')
+        ->get('page_manager.block_display')
+        ->get($block_display);
+      if (!empty($cached_values['contexts'])) {
+        $contexts = [];
+        foreach ($cached_values['contexts'] as $context_name => $context_definition) {
+          $contexts[$context_name] = new Context($context_definition);
+        }
+        return $contexts;
+      }
     }
     // If we are on a page manager page, return the available context.
     if (\Drupal::routeMatch()->getParameter('page_manager_page_variant')) {
