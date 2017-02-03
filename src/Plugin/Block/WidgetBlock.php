@@ -156,16 +156,15 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       $block_options[(string) $block_definition['category']][$plugin_id] = (string) $block_definition['admin_label'];
     }
 
+    // @todo: Remove Workaround for https://www.drupal.org/node/2798261.
+    $complete_form_state = $form_state;
     if ($form_state instanceof SubformStateInterface) {
-      $widget_blocks = (array) ($form_state->getCompleteFormState()->getValue(array('settings', 'blocks')) ?: $this->configuration['blocks']);
-      $layout = $form_state->getCompleteFormState()->getValue(array('settings', 'layout')) ?: $this->configuration['layout'];
-      $classes = $form_state->getCompleteFormState()->getValue(array('settings', 'classes')) ?: $this->configuration['classes'];
+      $complete_form_state = $form_state->getCompleteFormState();
     }
-    else {
-      $widget_blocks = $form_state->hasValue(array('settings', 'blocks')) ? $form_state->getValue(array('settings', 'blocks')) : $this->configuration['blocks'];
-      $layout = $form_state->hasValue(array('settings', 'layout')) ? $form_state->getValue(array('settings', 'layout')) : $this->configuration['layout'];
-      $classes = $form_state->hasValue(array('settings', 'classes')) ? $form_state->getValue(array('settings', 'classes')) : $this->configuration['classes'];
-    }
+    $widget_blocks = (array) ($complete_form_state->getValue(array('settings', 'blocks')) ?: $this->configuration['blocks']);
+    $layout = $complete_form_state->getValue(array('settings', 'layout')) ?: $this->configuration['layout'];
+    $classes = $complete_form_state->getValue(array('settings', 'classes')) ?: $this->configuration['classes'];
+
 
     $ajax_properties = array(
       '#ajax' => array(
