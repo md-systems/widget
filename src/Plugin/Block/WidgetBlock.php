@@ -9,6 +9,7 @@ namespace Drupal\widget\Plugin\Block;
 use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Plugin\Context\Context;
@@ -233,17 +234,13 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
       );
 
       if (!empty($block_config['id'])) {
+        /** @var \Drupal\Core\Block\BlockPluginInterface $block_plugin */
         $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block_config['id'], $block_config);
         $form['blocks'][$region_id] += $block_plugin->buildConfigurationForm(array(), $form_state);
 
         if ($block_plugin instanceof ContextAwarePluginInterface) {
           $form['blocks'][$region_id]['context_mapping'] = $this->addContextAssignmentElement($block_plugin, $this->getContexts());
         }
-
-        // @todo Support per-block caching and visibility. Breaks UI right now.
-        unset($form['blocks'][$region_id]['cache']);
-        unset($form['blocks'][$region_id]['visibility']);
-        unset($form['blocks'][$region_id]['visibility_tabs']);
       }
       else {
         //unset($form['blocks'][$region_id]);
@@ -263,7 +260,20 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
     // Set empty block ID's to NULL.
     foreach ($form_state->getValue('blocks') as $region_id => $block) {
       if (!empty($block['id'])) {
-        $this->configuration['blocks'][$region_id] = $block;
+
+        // Support both SubFormState and manually created FormState objects.
+        if ($form_state instanceof SubformState) {
+          $complete_form_state = $form_state->getCompleteFormState();
+          $subform_state = SubformState::createForSubform($form['settings']['blocks'][$region_id], $form, $complete_form_state);
+        }
+        else {
+          $subform_state = (new FormState())->setValues($form_state->getValue(['blocks', $region_id]));
+        }
+
+        /** @var \Drupal\Core\Block\BlockPluginInterface $block_plugin */
+        $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block['id'], []);
+        $block_plugin->submitConfigurationForm($form['settings']['blocks'][$region_id], $subform_state);
+        $this->configuration['blocks'][$region_id] = $block_plugin->getConfiguration();
       }
     }
 
