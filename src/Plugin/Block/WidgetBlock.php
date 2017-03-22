@@ -274,6 +274,9 @@ class WidgetBlock extends BlockBase implements LayoutBlockAndContextProviderInte
         $block_plugin = \Drupal::service('plugin.manager.block')->createInstance($block['id'], []);
         $block_plugin->submitConfigurationForm($form['settings']['blocks'][$region_id], $subform_state);
         $this->configuration['blocks'][$region_id] = $block_plugin->getConfiguration();
+
+        // Explicitly set the region as well on the configuration.
+        $this->configuration['blocks'][$region_id]['region'] = $region_id;
       }
     }
 
